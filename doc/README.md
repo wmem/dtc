@@ -8,6 +8,7 @@
 - 运行时是 QuickJS，不能依赖 Node.js API，也不能依赖浏览器 API。
 - 模板引擎固定为 EJS，当前仓库已提供可在 QuickJS 下加载的 `ejs.min.js`。
 - 构建链路固定为 `esbuild -> qjs -c -> 可执行文件`。
+- 路径处理必须同时兼容 Linux 和 Windows，包括相对路径、绝对路径和路径分隔符差异。
 
 ## 当前状态
 
@@ -30,9 +31,10 @@
 
 ## 文档角色
 
-- `doc/prot.md`：原始设计草案，保留为历史输入。
 - `doc/spec-*.md`：正式规格，后续实现和测试以这些文档为准。
 - `doc/implementation-status.md`：规格与代码对齐表，便于后续 AI 迭代。
+
+当前 `doc/` 下的正式文档即为项目事实来源，不再依赖其他草稿说明。
 
 ## 构建
 
@@ -42,4 +44,4 @@
 2. 使用 `bin/qjs-linux-x86_64` 将 bundle 编译为 Linux 可执行文件 `build/dtc`。
 3. 使用同一 bundle 和 Windows 宿主可执行文件生成 `build/dtc.exe`。
 
-这意味着最终实现必须保证入口逻辑在 QuickJS 环境中可独立运行。
+这意味着最终实现必须保证入口逻辑在 QuickJS 环境中可独立运行，同时路径与文件行为不能假定只运行在单一平台。

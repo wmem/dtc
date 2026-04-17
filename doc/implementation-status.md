@@ -17,14 +17,16 @@
 | 编译可执行文件 | partial | `pbuild.sh` 已定义 `qjs` 编译步骤，但依赖本地 `bin/qjs-*` 准备完毕。 |
 | CLI 参数处理 | todo | `src/index.js` 还没有解析配置文件路径。 |
 | 配置读取与校验 | todo | 尚未实现 `data` / `tpl` 的解析和规范化。 |
-| 路径归一化 | todo | 尚未抽出 QuickJS 可用的路径工具。 |
+| 路径归一化 | todo | 尚未抽出 QuickJS 可用的路径工具，也还未覆盖 Windows / Linux 差异。 |
 | 入口数据执行 | todo | 尚未从入口 JS 构建最终全局对象。 |
 | `include()` | todo | 仅存在设计说明，没有代码实现。 |
 | `remove()` | todo | 仅存在设计说明，没有代码实现。 |
-| 深合并规则 | todo | 尚未实现独立合并模块。 |
+| 深合并规则 | todo | 尚未实现独立合并模块，也还没有类型不匹配时报错的能力。 |
+| 对象关系字段补充 | todo | 尚未为对象补充 `name` 与 `parent`。 |
 | 模板 glob 搜索 | todo | 尚未实现。 |
-| `match` 数据搜索 | todo | 尚未实现。 |
-| EJS 正式渲染上下文 | todo | 还未按 `item/root/template/output` 结构提供上下文。 |
+| 通配符公共库 | todo | 尚未抽出供 glob 与 `match` 共享的匹配实现。 |
+| `match` 数据搜索 | todo | 尚未实现，且尚未按“只遍历普通对象、不进入数组”落地。 |
+| EJS 正式渲染上下文 | todo | 还未按 `item/parent/root/template/output` 结构提供上下文。 |
 | 输出聚合与写盘 | todo | 尚未实现。 |
 | 错误处理与退出码 | todo | 尚未形成完整 CLI 错误路径。 |
 
@@ -36,6 +38,7 @@
 - 没有配置读取。
 - 没有文件系统操作。
 - 没有模板任务执行逻辑。
+- 没有任何跨平台路径处理。
 
 ### `src/ejs/ejs-wrapper.js`
 

@@ -28,6 +28,7 @@ ejs.render(templateContent, renderContext)
 ```js
 {
   item,
+  parent,
   root,
   template,
   output
@@ -37,6 +38,7 @@ ejs.render(templateContent, renderContext)
 ### 字段含义
 
 - `item`：当前命中的数据对象。
+- `parent`：当前命中对象的父对象，根对象时为 `undefined`。
 - `root`：最终全局对象。
 - `template.name`：模板基础文件名。
 - `template.path`：模板绝对路径。
@@ -44,13 +46,14 @@ ejs.render(templateContent, renderContext)
 
 ## 模板编写约定
 
-模板作者应优先使用 `item` 访问当前对象，用 `root` 访问全局数据。
+模板作者应优先使用 `item` 访问当前对象，用 `parent` 访问父对象，用 `root` 访问全局数据。构建完成后的普通对象都应具备可用的 `name` 字段。
 
 示例：
 
 ```ejs
 /* template: <%= template.name %> */
 const name = "<%= item.name %>";
+const parentName = "<%= parent ? parent.name : '' %>";
 const version = "<%= root.meta.version %>";
 ```
 

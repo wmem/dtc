@@ -34,6 +34,7 @@
   - 读取配置文件。
   - 解析 JSON。
   - 归一化和校验路径。
+  - 统一处理 Linux 与 Windows 绝对路径规则。
 
 ### 数据层
 
@@ -43,10 +44,14 @@
   - 管理模块加载栈和已加载集合。
 - `src/core/merge.js`
   - 深合并对象。
+  - 类型不匹配时报错。
+- `src/core/object-meta.js`
+  - 为普通对象补充 `name` 与 `parent`。
 - `src/core/remove-path.js`
   - 删除点分路径。
 - `src/core/data-query.js`
   - 搜索带 `match` 的对象。
+  - 只遍历普通对象，不进入数组。
 
 ### 模板层
 
@@ -65,8 +70,17 @@
   - 基于 QuickJS 可用能力封装文件读写。
 - `src/runtime/path.js`
   - 提供最小路径拼接、规范化和相对路径解析。
+  - 提供 Linux / Windows 绝对路径判断与统一比较键。
 - `src/runtime/glob.js`
   - 实现受限的 glob 展开能力。
+
+### 公共库层
+
+- `src/lib/pattern.js`
+  - 统一封装通配符匹配。
+  - 同时服务于模板文件发现和 `match` 匹配。
+- `src/lib/object-kind.js`
+  - 统一识别普通对象、数组、`null` 和标量类型，避免合并逻辑分散重复。
 
 ### 输出层
 
@@ -82,6 +96,8 @@
 - 后续替换实现时影响面更小。
 - AI 迭代时更容易定位边界。
 
+对于通配符匹配、类型判断这类会被多处用到的逻辑，应优先沉淀到公共库，再由业务模块通过 `import` 复用。
+
 ## 构建链路
 
 当前 `pbuild.sh` 采用如下流程：
@@ -96,6 +112,7 @@
 - Bundle 里不能残留 Node.js 内建模块依赖。
 - 所有运行时代码都必须可以被 `esbuild` 打进单文件。
 - 与平台相关的行为尽量集中在 `src/runtime/*`。
+- 重复性逻辑应尽量下沉到 `src/lib/*`，避免在多个业务模块复制相同实现。
 
 ## CLI 建议
 
@@ -117,17 +134,20 @@ dtc path/to/dtc.json
 
 1. `src/runtime/path.js`
 2. `src/runtime/fs.js`
-3. `src/core/config.js`
-4. `src/core/merge.js`
-5. `src/core/remove-path.js`
-6. `src/core/data-loader.js`
-7. `src/core/data-query.js`
-8. `src/runtime/glob.js`
-9. `src/core/template-discovery.js`
-10. `src/core/template-match.js`
-11. `src/core/render-task.js`
-12. `src/core/output-writer.js`
-13. `src/core/run.js`
-14. `src/index.js`
+3. `src/lib/object-kind.js`
+4. `src/lib/pattern.js`
+5. `src/core/config.js`
+6. `src/core/merge.js`
+7. `src/core/remove-path.js`
+8. `src/core/data-loader.js`
+9. `src/core/object-meta.js`
+10. `src/core/data-query.js`
+11. `src/runtime/glob.js`
+12. `src/core/template-discovery.js`
+13. `src/core/template-match.js`
+14. `src/core/render-task.js`
+15. `src/core/output-writer.js`
+16. `src/core/run.js`
+17. `src/index.js`
 
 这个顺序保证每一层都建立在前一层已稳定的抽象之上。
