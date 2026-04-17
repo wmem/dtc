@@ -1,15 +1,58 @@
-import ejs from "./ejs/ejs-wrapper.js";
-const tpl = "Hello <%= name+'ss' %>";
-const result = ejs.render(tpl, { name: "world" });
-console.log(result);
+import { run } from "./core/run.js";
 
-// try {
-//     const test = await import("./test.js");
+function printUsage() {
+  const message = "Usage: dtc <config-file>\n";
+  if (typeof std !== "undefined" && std.err) {
+    std.err.puts(message);
+    return;
+  }
+  if (typeof console !== "undefined" && typeof console.log === "function") {
+    console.log(message.trim());
+    return;
+  }
+  if (typeof print === "function") {
+    print(message.trim());
+  }
+}
 
-//     console.log("module loaded");
+function printError(error) {
+  const message = `${error.message}\n`;
+  if (typeof std !== "undefined" && std.err) {
+    std.err.puts(message);
+    return;
+  }
+  if (typeof console !== "undefined" && typeof console.log === "function") {
+    console.log(error.message);
+    return;
+  }
+  if (typeof print === "function") {
+    print(error.message);
+  }
+}
 
-//     console.log(test.some_test);
-//     console.log(test.default.haha);
-// } catch (error) {
-//     console.log("Error loading test.js:", error);
-// }
+function getArgs() {
+  if (typeof scriptArgs !== "undefined" && Array.isArray(scriptArgs)) {
+    const args = scriptArgs.slice();
+    if (args.length >= 2) {
+      const first = String(args[0]);
+      if (first.endsWith(".js") || first.endsWith(".mjs")) {
+        return args.slice(1);
+      }
+    }
+    return args;
+  }
+  return [];
+}
+
+try {
+  const args = getArgs();
+  if (args.length !== 1) {
+    printUsage();
+    throw new Error("Invalid arguments.");
+  }
+
+  run(args[0]);
+} catch (error) {
+  printError(error);
+  throw error;
+}

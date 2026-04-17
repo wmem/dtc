@@ -12,33 +12,31 @@
 
 | 能力 | 状态 | 说明 |
 | --- | --- | --- |
-| QuickJS 下加载 EJS | partial | `src/ejs/ejs-wrapper.js` 已可用，但只验证了最小渲染场景。 |
-| 构建 bundle | partial | `pbuild.sh` 已能调用 `esbuild` 打包 `src/index.js`。 |
-| 编译可执行文件 | partial | `pbuild.sh` 已定义 `qjs` 编译步骤，但依赖本地 `bin/qjs-*` 准备完毕。 |
-| CLI 参数处理 | todo | `src/index.js` 还没有解析配置文件路径。 |
-| 配置读取与校验 | todo | 尚未实现 `data` / `tpl` 的解析和规范化。 |
-| 路径归一化 | todo | 尚未抽出 QuickJS 可用的路径工具，也还未覆盖 Windows / Linux 差异。 |
-| 入口数据执行 | todo | 尚未从入口 JS 构建最终全局对象。 |
-| `include()` | todo | 仅存在设计说明，没有代码实现。 |
-| `remove()` | todo | 仅存在设计说明，没有代码实现。 |
-| 深合并规则 | todo | 尚未实现独立合并模块，也还没有类型不匹配时报错的能力。 |
-| 对象关系字段补充 | todo | 尚未为对象补充 `name` 与 `parent`。 |
-| 模板 glob 搜索 | todo | 尚未实现。 |
-| 通配符公共库 | todo | 尚未抽出供 glob 与 `match` 共享的匹配实现。 |
-| `match` 数据搜索 | todo | 尚未实现，且尚未按“只遍历普通对象、不进入数组”落地。 |
-| EJS 正式渲染上下文 | todo | 还未按 `item/parent/root/template/output` 结构提供上下文。 |
-| 输出聚合与写盘 | todo | 尚未实现。 |
-| 错误处理与退出码 | todo | 尚未形成完整 CLI 错误路径。 |
+| QuickJS 下加载 EJS | done | `src/ejs/ejs-wrapper.js` 已接入正式渲染流程，模板任务通过它调用 `ejs.render()`。 |
+| 构建 bundle | done | `pbuild.sh` 已可用 `esbuild` 打包完整 CLI。 |
+| 编译可执行文件 | partial | `pbuild.sh` 可以产出 `build/dtc` 和 `build/dtc.exe`，但当前 QuickJS-ng 独立可执行文件不暴露 `std/os`，无法完成文件系统主流程。 |
+| CLI 参数处理 | done | `src/index.js` 已实现参数解析和用法提示。 |
+| 配置读取与校验 | done | `src/core/config.js` 已实现 `data` / `tpl` 的解析、校验和输出冲突检查。 |
+| 路径归一化 | done | `src/runtime/path.js` 已实现跨平台路径规范化、绝对路径判断和比较键。 |
+| 入口数据执行 | done | `src/core/data-loader.js` 已能从入口脚本构建最终全局对象。 |
+| `include()` | done | 已支持同步包含、相对路径解析和循环包含检测。 |
+| `remove()` | done | 已支持点分路径删除。 |
+| 深合并规则 | done | `src/core/merge.js` 已实现深合并与类型不匹配报错。 |
+| 对象关系字段补充 | done | `src/core/object-meta.js` 已补充 `name` 与 `parent`。 |
+| 模板 glob 搜索 | done | `src/runtime/glob.js` 与 `src/core/template-discovery.js` 已实现模板发现与去重。 |
+| 通配符公共库 | done | `src/lib/pattern.js` 已供 glob 与 `match` 共享。 |
+| `match` 数据搜索 | done | `src/core/data-query.js` 已按“只遍历普通对象、不进入数组”实现搜索。 |
+| EJS 正式渲染上下文 | done | 已按 `item/parent/root/template/output` 提供上下文。 |
+| 输出聚合与写盘 | done | 已实现片段拼接、目录创建和最终写入。 |
+| 错误处理与退出码 | partial | 源码模式和 `qjs --std build/bundle.js` 可给出清晰错误，但独立可执行文件受 QuickJS-ng `std/os` 限制。 |
 
 ## 当前代码现状
 
 ### `src/index.js`
 
-- 只是一个 EJS 渲染示例。
-- 没有配置读取。
-- 没有文件系统操作。
-- 没有模板任务执行逻辑。
-- 没有任何跨平台路径处理。
+- 已作为正式 CLI 入口。
+- 已实现参数解析、用法提示和错误输出。
+- 调用 `src/core/run.js` 串联完整流程。
 
 ### `src/ejs/ejs-wrapper.js`
 
@@ -50,13 +48,14 @@
 
 - 已固定 `esbuild -> qjs` 的构建链路。
 - 默认输出 `build/dtc` 和 `build/dtc.exe`。
-- 说明正式实现必须保证 `src/index.js` 在 QuickJS 中可运行。
+- `build/bundle.js` 可通过 `bin/qjs-linux-x86_64 --std` 正常运行。
+- 当前 `qjs -c` 生成的独立可执行文件不提供 `std/os`，因此不能直接支撑文件系统主流程。
 
 ## 推荐下一步
 
-1. 先实现 `src/runtime/path.js` 和 `src/runtime/fs.js`，建立 QuickJS 下的基础能力。
-2. 再实现配置解析、数据执行和对象操作。
-3. 最后实现模板发现、匹配、渲染和输出。
+1. 如果要继续交付真正可独立运行的二进制，需要确认 QuickJS-ng 独立程序如何启用 `std/os`，或替换打包策略。
+2. 为核心模块补充自动化测试样例，尤其是路径归一化、深合并、glob 和数据加载顺序。
+3. 如需扩展模板能力，再讨论 helper、separator、encoding 等未来字段。
 
 ## 更新规则
 

@@ -1,0 +1,112 @@
+import { isPlainObject } from "../lib/object-kind.js";
+import { readTextFile } from "../runtime/fs.js";
+import { dirname, normalizePath, resolvePath, toComparablePath } from "../runtime/path.js";
+import { mergeInto } from "./merge.js";
+import { applyObjectMetadata } from "./object-meta.js";
+import { removePath } from "./remove-path.js";
+
+function requireStdEval() {
+  if (typeof std === "undefined" || typeof std.evalScript !== "function") {
+    throw new Error("QuickJS std.evalScript is not available. Please run with --std enabled.");
+  }
+}
+
+function transformDataModule(source, filePath) {
+  const exportRegex = /\bexport\s+default\b/;
+  if (!exportRegex.test(source)) {
+    throw new Error(`Data file must contain 'export default': ${filePath}`);
+  }
+
+  if (/\bimport\s+[^("'`]/.test(source) || /\bimport\s*\(/.test(source)) {
+    throw new Error(`Data file import is not supported in dtc data modules: ${filePath}`);
+  }
+
+  const transformed = source.replace(exportRegex, "__dtc_default_export__ =");
+  return [
+    "(() => {",
+    "  let __dtc_default_export__;",
+    transformed,
+    "  return __dtc_default_export__;",
+    "})()",
+    `//# sourceURL=${filePath}`,
+  ].join("\n");
+}
+
+function executeDataModule(filePath) {
+  requireStdEval();
+  const source = readTextFile(filePath);
+  const wrappedSource = transformDataModule(source, filePath);
+  return std.evalScript(wrappedSource);
+}
+
+function loadModule(filePath, state) {
+  const normalizedFile = normalizePath(filePath);
+  const comparablePath = toComparablePath(normalizedFile);
+
+  if (state.loadedFiles.has(comparablePath)) {
+    return;
+  }
+
+  const loadingIndex = state.loadingStack.findIndex((item) => item === comparablePath);
+  if (loadingIndex !== -1) {
+    const cycle = state.loadingStack.slice(loadingIndex).concat(comparablePath).join(" -> ");
+    throw new Error(`Circular include detected: ${cycle}`);
+  }
+
+  state.loadingStack.push(comparablePath);
+  state.fileStack.push(normalizedFile);
+
+  try {
+    const exported = executeDataModule(normalizedFile);
+    if (!isPlainObject(exported)) {
+      throw new Error(`Default export must be a plain object: ${normalizedFile}`);
+    }
+    mergeInto(state.globalData, exported);
+    state.loadedFiles.add(comparablePath);
+  } catch (error) {
+    throw new Error(`Failed to load data file ${normalizedFile}: ${error.message}`);
+  } finally {
+    state.fileStack.pop();
+    state.loadingStack.pop();
+  }
+}
+
+export function buildGlobalData(entryPath) {
+  const normalizedEntry = normalizePath(entryPath);
+  const state = {
+    globalData: {},
+    loadedFiles: new Set(),
+    loadingStack: [],
+    fileStack: [],
+  };
+
+  const previousInclude = globalThis.include;
+  const previousRemove = globalThis.remove;
+
+  globalThis.include = (targetPath) => {
+    if (typeof targetPath !== "string" || targetPath.length === 0) {
+      throw new Error("include() expects a non-empty path string.");
+    }
+
+    const currentFile = state.fileStack[state.fileStack.length - 1];
+    if (!currentFile) {
+      throw new Error("include() can only be used while a data file is being evaluated.");
+    }
+
+    const resolvedPath = resolvePath(dirname(currentFile), targetPath);
+    loadModule(resolvedPath, state);
+  };
+
+  globalThis.remove = (dottedPath) => {
+    removePath(state.globalData, dottedPath);
+  };
+
+  try {
+    loadModule(normalizedEntry, state);
+    applyObjectMetadata(state.globalData);
+    return state.globalData;
+  } finally {
+    globalThis.include = previousInclude;
+    globalThis.remove = previousRemove;
+  }
+}
