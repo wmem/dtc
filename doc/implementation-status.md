@@ -16,6 +16,7 @@
 | 构建 bundle | done | `pbuild.sh` 已可用 `esbuild` 打包完整 CLI。 |
 | 编译可执行文件 | done | `pbuild.sh` 可以产出 `build/dtc` 和 `build/dtc.exe`，并支持通过 `qjs:std` / `qjs:os` 内建模块访问运行时能力。 |
 | CLI 参数处理 | done | `src/index.js` 已实现参数解析和用法提示。 |
+| 版本管理 | done | 已支持 `dtc --version`，并由 `src/version.js` 统一维护版本号。 |
 | 配置读取与校验 | done | `src/core/config.js` 已实现 `data` / `tpl` 的解析、校验和输出冲突检查。 |
 | 路径归一化 | done | `src/runtime/path.js` 已实现跨平台路径规范化、绝对路径判断和比较键。 |
 | 入口数据执行 | done | `src/core/data-loader.js` 已能从入口脚本构建最终全局对象。 |

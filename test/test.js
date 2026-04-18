@@ -6,6 +6,7 @@ import { collectMatchedObjects } from "../src/core/data-query.js";
 import { run } from "../src/core/run.js";
 import { normalizePath } from "../src/runtime/path.js";
 import { readTextFile } from "../src/runtime/fs.js";
+import { VERSION } from "../src/version.js";
 
 function unwrapOsResult(result, action) {
   if (!Array.isArray(result)) {
@@ -42,6 +43,11 @@ function expectThrows(fn, expectedPart, message) {
 
 function getCwd() {
   return normalizePath(unwrapOsResult(os.getcwd(), "getcwd"));
+}
+
+function runVersionCase() {
+  assert(typeof VERSION === "string" && VERSION.length > 0, "VERSION 应为非空字符串");
+  assert(/^\d+\.\d+\.\d+$/.test(VERSION), "VERSION 应使用 x.y.z 格式");
 }
 
 function runBasicCase(projectRoot) {
@@ -184,6 +190,9 @@ function runCircularIncludeCase(projectRoot) {
 
 function main() {
   const projectRoot = getCwd();
+
+  runVersionCase();
+  console.log("case-version passed");
 
   runBasicCase(projectRoot);
   console.log("case-basic passed");

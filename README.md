@@ -12,6 +12,22 @@
 - 自动为普通对象补充 `name` 和 `parent`
 - 支持打包为 Linux / Windows 可执行文件
 
+## 版本管理
+
+- 当前版本由 `src/version.js` 统一管理
+- 如果要修改版本号，只需要改这一个文件
+- CLI 可通过以下命令查看版本：
+
+```sh
+build/dtc --version
+```
+
+或：
+
+```sh
+bin/qjs-linux-x86_64 src/index.js --version
+```
+
 ## 设计约束
 
 - 全部业务代码使用 JavaScript 实现
@@ -192,6 +208,12 @@ export default {
 bin/qjs-linux-x86_64 src/index.js path/to/dtc.json
 ```
 
+查看版本：
+
+```sh
+bin/qjs-linux-x86_64 src/index.js --version
+```
+
 使用打包后的 bundle 运行：
 
 ```sh
@@ -218,6 +240,12 @@ bin/qjs-linux-x86_64 build/bundle.js path/to/dtc.json
 build/dtc path/to/dtc.json
 ```
 
+查看编译产物版本：
+
+```sh
+build/dtc --version
+```
+
 ## 测试
 
 运行全部测试：
@@ -229,6 +257,7 @@ bin/qjs-linux-x86_64 test/test.js
 当前测试覆盖：
 
 - 基础渲染流程
+- 版本号来源
 - 调试输出文件
 - `include()` / `remove()` / `update()` / `get()`
 - `name` / `parent`
