@@ -12,6 +12,27 @@
 - 自动为普通对象补充 `name` 和 `parent`
 - 支持打包为 Linux / Windows 可执行文件
 
+## 设计约束
+
+- 全部业务代码使用 JavaScript 实现
+- 运行时是 QuickJS，不能依赖 Node.js API，也不能依赖浏览器 API
+- 模板引擎固定为 EJS，当前通过 `src/ejs/ejs-wrapper.js` 适配到 QuickJS
+- 构建链路固定为 `esbuild -> qjs -c -> 可执行文件`
+- 路径处理同时兼容 Linux 和 Windows，包括相对路径、绝对路径和分隔符差异
+
+## 当前状态
+
+当前主流程已经可用，已经实现：
+
+- 配置读取与校验
+- 数据脚本执行、`include()`、`remove()`
+- 全局对象深合并与类型冲突报错
+- `name` / `parent` 元信息补充
+- 模板发现、`match` 匹配与 EJS 渲染
+- 输出写盘
+- 打包为 `build/bundle.js`、`build/dtc`、`build/dtc.exe`
+- 多组集成测试
+
 ## 目录结构
 
 ```text
@@ -46,6 +67,18 @@
 7. 遍历最终全局对象中带 `match` 的普通对象
 8. 用 EJS 渲染匹配到的模板
 9. 将结果写入 `tpl[].out`
+
+## 文档导航
+
+项目的正式规格和实现说明都在 `doc/` 下：
+
+1. `doc/spec-vision.md`：整体目标、处理流程、边界和输出规则
+2. `doc/spec-config.md`：配置文件结构和路径规则
+3. `doc/spec-data-model.md`：入口脚本、`include()`、`remove()` 和对象合并语义
+4. `doc/spec-templates.md`：模板发现、`match` 规则和输出聚合
+5. `doc/spec-rendering.md`：EJS 渲染上下文和 QuickJS 约束
+6. `doc/architecture-build.md`：源码模块划分和构建链路
+7. `doc/implementation-status.md`：当前实现覆盖情况
 
 ## 环境要求
 
@@ -186,12 +219,4 @@ bin/qjs-linux-x86_64 test/test.js
 
 ## 参考文档
 
-更详细的规格和设计说明见 `doc/`：
-
-- `doc/spec-vision.md`
-- `doc/spec-config.md`
-- `doc/spec-data-model.md`
-- `doc/spec-templates.md`
-- `doc/spec-rendering.md`
-- `doc/architecture-build.md`
-- `doc/implementation-status.md`
+更详细的规格和设计说明见 `doc/` 下各文档。
