@@ -1,6 +1,6 @@
 # 模板发现与匹配规格
 
-本文档定义模板文件的发现方式、`match` 匹配规则和输出聚合规则。
+本文档定义模板文件的发现方式、`match` 与 `enable` 规则以及输出聚合规则。
 
 ## 模板任务模型
 
@@ -37,6 +37,7 @@
 - 是普通对象。
 - 包含 `match` 字段。
 - `match` 是非空字符串。
+- 包含 `enable` 字段，且 `enable === true`。
 - 数组中的对象元素不参与匹配候选搜索。
 
 ### 比较对象
@@ -50,7 +51,7 @@
 
 ### 匹配语义
 
-`match` 使用类 glob 语义，规则与 `tpl[].files` 一致：
+只有在 `enable === true` 的前提下，`match` 才会参与模板文件名匹配。`match` 使用类 glob 语义，规则与 `tpl[].files` 一致：
 
 - `*`：匹配任意长度字符。
 - `?`：匹配单个字符。
@@ -60,6 +61,12 @@
 - `match: "*.tpl"`：匹配所有 `.tpl` 模板。
 - `match: "abc.tpl"`：仅匹配 `abc.tpl`。
 - `match: "x*.tpl"`：匹配以 `x` 开头的模板文件。
+
+示例：
+
+- `enable: true, match: "detail.tpl"`：参与 `detail.tpl` 渲染。
+- `enable: false, match: "detail.tpl"`：即使 `match` 命中，也不参与渲染。
+- 缺少 `enable` 字段：不参与渲染。
 
 ## 单模板渲染规则
 

@@ -4,6 +4,7 @@ export default {
   },
   docs: {
     article: {
+      enable: true,
       match: "missing.tpl",
       title: "not-selected"
     }

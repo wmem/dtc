@@ -25,7 +25,7 @@
 | 对象关系字段补充 | done | `src/core/object-meta.js` 已补充 `name` 与 `parent`。 |
 | 模板 glob 搜索 | done | `src/runtime/glob.js` 与 `src/core/template-discovery.js` 已实现模板发现与去重。 |
 | 通配符公共库 | done | `src/lib/pattern.js` 已供 glob 与 `match` 共享。 |
-| `match` 数据搜索 | done | `src/core/data-query.js` 已按“只遍历普通对象、不进入数组”实现搜索。 |
+| `match` 数据搜索 | done | `src/core/data-query.js` 已按“只遍历普通对象、不进入数组、且要求 enable=true”实现搜索。 |
 | EJS 正式渲染上下文 | done | 已按 `item/parent/root/template/output` 提供上下文。 |
 | 调试输出文件 | done | 已支持输出全局对象快照和模板命中对象明细。 |
 | 输出聚合与写盘 | done | 已实现片段拼接、目录创建和最终写入。 |

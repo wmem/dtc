@@ -3,11 +3,13 @@
     "templatePath": "/home/mem/project/mem/dtc/test/case-basic/tpl/detail.tpl",
     "matchedObjects": [
       {
+        "enable": true,
         "match": "detail.tpl",
         "title": "detail-from-sub",
         "name": "detail"
       },
       {
+        "enable": true,
         "match": "detail.tpl",
         "title": "detail-from-root",
         "name": "item"
@@ -19,10 +21,12 @@
     "matchedObjects": [
       {
         "detail": {
+          "enable": true,
           "match": "detail.tpl",
           "title": "detail-from-sub",
           "name": "detail"
         },
+        "enable": true,
         "match": "main.tpl",
         "title": "main-from-root",
         "name": "modules"

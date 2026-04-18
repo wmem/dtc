@@ -119,6 +119,23 @@ function runWildcardCase(projectRoot) {
   assert(rendered === expected, `通配符匹配输出不符合预期。\n--- expected ---\n${expected}\n--- actual ---\n${rendered}`);
 }
 
+function runEnableFilterCase(projectRoot) {
+  const caseDir = `${projectRoot}/test/case-enable-filter`;
+  const configPath = `${caseDir}/dtc.json`;
+  const outputPath = `${caseDir}/out/generated.txt`;
+  const config = loadConfig(configPath);
+  const rootData = buildGlobalData(config.dataEntry);
+  const matchedObjects = collectMatchedObjects(rootData);
+
+  assert(matchedObjects.length === 1, "只有 enable=true 的对象才应参与模板渲染");
+
+  run(configPath);
+
+  const rendered = readTextFile(outputPath);
+  const expected = "ENABLED|enabledItem|render-me";
+  assert(rendered === expected, `enable 过滤输出不符合预期。\n--- expected ---\n${expected}\n--- actual ---\n${rendered}`);
+}
+
 function runTypeMismatchCase(projectRoot) {
   const caseDir = `${projectRoot}/test/case-type-mismatch`;
   const configPath = `${caseDir}/dtc.json`;
@@ -154,6 +171,9 @@ function main() {
 
   runWildcardCase(projectRoot);
   console.log("case-wildcard passed");
+
+  runEnableFilterCase(projectRoot);
+  console.log("case-enable-filter passed");
 
   runTypeMismatchCase(projectRoot);
   console.log("case-type-mismatch passed");

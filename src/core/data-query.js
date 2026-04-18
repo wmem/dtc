@@ -1,8 +1,8 @@
 // 文件说明：
-// 递归遍历最终全局对象，收集所有可参与模板渲染的 match 对象。
+// 递归遍历最终全局对象，收集所有满足 match + enable=true 的可渲染对象。
 import { isPlainObject } from "../lib/object-kind.js";
 
-// 收集所有带 match 的普通对象，供模板阶段统一过滤。
+// 收集所有满足模板渲染条件的普通对象，供模板阶段统一过滤。
 export function collectMatchedObjects(root) {
   const items = [];
   visit(root, items);
@@ -15,7 +15,7 @@ function visit(node, items) {
     return;
   }
 
-  if (typeof node.match === "string" && node.match.length > 0) {
+  if (node.enable === true && typeof node.match === "string" && node.match.length > 0) {
     items.push(node);
   }
 
