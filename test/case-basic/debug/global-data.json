@@ -3,7 +3,7 @@
     "detail": {
       "enable": true,
       "match": "detail.tpl",
-      "title": "detail-from-sub"
+      "title": "detail-updated-by-root"
     },
     "enable": true,
     "match": "main.tpl",
@@ -16,10 +16,12 @@
     }
   ],
   "meta": {
+    "extra": "added-by-update",
     "version": "1.0.0"
   },
   "docs": {
     "item": {
+      "note": "created-before-merge",
       "enable": true,
       "match": "detail.tpl",
       "title": "detail-from-root"

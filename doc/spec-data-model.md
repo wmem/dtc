@@ -1,6 +1,6 @@
 # 数据模型与脚本执行规格
 
-本文档定义入口数据脚本、`include()`、`remove()` 和最终全局对象的构建规则。
+本文档定义入口数据脚本、`include()`、`remove()`、`update()` 和最终全局对象的构建规则。
 
 ## 基本模型
 
@@ -14,8 +14,9 @@
 1. 加载入口文件。
 2. 执行入口文件顶层代码。
 3. 若顶层代码调用 `include()`，立即处理被包含文件。
-4. 当前文件顶层执行结束后，将其默认导出的对象合并到全局对象。
-5. 入口文件及其递归包含的所有文件处理完成后，得到最终全局对象。
+4. 顶层代码中的 `remove()` 与 `update()` 立即作用于当前全局对象。
+5. 当前文件顶层执行结束后，将其默认导出的对象合并到全局对象。
+6. 入口文件及其递归包含的所有文件处理完成后，得到最终全局对象。
 
 ## `include(path)`
 
@@ -53,6 +54,25 @@
 - 如果路径存在，则删除最终字段。
 - 如果路径不存在，则忽略，不报错。
 - 删除后父对象保持存在，不自动清理空对象。
+
+## `update(path, value)`
+
+### 作用
+
+更新当前全局对象上的指定路径；如果目标路径不存在，则创建并写入新值。
+
+### 路径格式
+
+- `update()` 接受点分路径字符串，例如 `meta.version`。
+- 不支持数组索引。
+- 不支持通配符。
+
+### 行为规则
+
+- 如果最终字段已经存在，则直接覆盖其值。
+- 如果中间路径不存在，则自动创建普通对象。
+- 如果中间路径存在但不是普通对象，则直接报错。
+- `value` 可以是任意可放入全局对象的 JavaScript 值。
 
 ## 合并规则
 
@@ -113,8 +133,13 @@ export default {
 // root.js
 include("sub.js");
 remove("test.test1");
+update("test.test2.test3", "from-update");
+update("meta.version", "1.0.0");
 
 export default {
+  meta: {
+    extra: "created"
+  },
   test: {
     test2: {
       test3: "45555"
@@ -127,6 +152,10 @@ export default {
 
 ```js
 {
+  meta: {
+    version: "1.0.0",
+    extra: "created"
+  },
   test: {
     test2: {
       test3: "45555"
@@ -152,4 +181,5 @@ export default {
 - `src/core/merge.js`：负责对象深合并。
 - `src/core/object-meta.js`：负责补充 `name` 与 `parent`。
 - `src/core/remove-path.js`：负责点分路径删除。
+- `src/core/update-path.js`：负责点分路径更新与新增。
 - `src/core/data-query.js`：负责递归搜集带 `match` 的对象。

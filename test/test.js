@@ -60,6 +60,9 @@ function runBasicCase(projectRoot) {
   assert(rootData.modules.name === "modules", "modules.name 应自动补成 modules");
   assert(rootData.modules.parent === rootData, "modules.parent 应指向根对象");
   assert(rootData.modules.obsolete === undefined, "remove() 应删除 modules.obsolete");
+  assert(rootData.modules.detail.title === "detail-updated-by-root", "update() 应能更新已有字段");
+  assert(rootData.meta.extra === "added-by-update", "update() 应能创建缺失的中间对象和字段");
+  assert(rootData.docs.item.note === "created-before-merge", "update() 应能在默认导出合并前创建路径");
   assert(rootData.docs.item.parent === rootData.docs, "子对象 parent 应正确指向父对象");
   assert(matchedObjects.length === 3, "应只找到 3 个可渲染对象，数组中的对象不能参与遍历");
 
@@ -67,7 +70,7 @@ function runBasicCase(projectRoot) {
 
   const rendered = std.loadFile(outputPath);
   const expected = [
-    "DETAIL|name=detail|parent=modules|title=detail-from-sub|version=1.0.0",
+    "DETAIL|name=detail|parent=modules|title=detail-updated-by-root|version=1.0.0",
     "DETAIL|name=item|parent=docs|title=detail-from-root|version=1.0.0",
     "MAIN|name=modules|parent=root|title=main-from-root|version=1.0.0"
   ].join("\n");
@@ -78,6 +81,9 @@ function runBasicCase(projectRoot) {
   assert(debugData.name === undefined, "全局对象调试输出应在注入 name 前生成");
   assert(debugData.parent === undefined, "全局对象调试输出不应包含 parent");
   assert(debugData.modules.obsolete === undefined, "全局对象调试输出应体现 remove() 的结果");
+  assert(debugData.modules.detail.title === "detail-updated-by-root", "全局对象调试输出应体现 update() 的更新结果");
+  assert(debugData.meta.extra === "added-by-update", "全局对象调试输出应体现 update() 的新增结果");
+  assert(debugData.docs.item.note === "created-before-merge", "全局对象调试输出应保留 update() 新建的路径");
   assert(debugData.docs.item.title === "detail-from-root", "全局对象调试输出应包含合并后的数据");
 
   const debugMatch = JSON.parse(readTextFile(debugMatchPath));

@@ -5,10 +5,11 @@
       {
         "enable": true,
         "match": "detail.tpl",
-        "title": "detail-from-sub",
+        "title": "detail-updated-by-root",
         "name": "detail"
       },
       {
+        "note": "created-before-merge",
         "enable": true,
         "match": "detail.tpl",
         "title": "detail-from-root",
@@ -23,7 +24,7 @@
         "detail": {
           "enable": true,
           "match": "detail.tpl",
-          "title": "detail-from-sub",
+          "title": "detail-updated-by-root",
           "name": "detail"
         },
         "enable": true,

@@ -40,7 +40,7 @@
 
 - `src/core/data-loader.js`
   - 执行入口模块。
-  - 暴露 `include()` / `remove()`。
+  - 暴露 `include()` / `remove()` / `update()`。
   - 管理模块加载栈和已加载集合。
 - `src/core/merge.js`
   - 深合并对象。
@@ -49,6 +49,8 @@
   - 为普通对象补充 `name` 与 `parent`。
 - `src/core/remove-path.js`
   - 删除点分路径。
+- `src/core/update-path.js`
+  - 更新或新增点分路径。
 - `src/core/data-query.js`
   - 搜索带 `match` 的对象。
   - 只遍历普通对象，不进入数组。
@@ -139,15 +141,16 @@ dtc path/to/dtc.json
 5. `src/core/config.js`
 6. `src/core/merge.js`
 7. `src/core/remove-path.js`
-8. `src/core/data-loader.js`
-9. `src/core/object-meta.js`
-10. `src/core/data-query.js`
-11. `src/runtime/glob.js`
-12. `src/core/template-discovery.js`
-13. `src/core/template-match.js`
-14. `src/core/render-task.js`
-15. `src/core/output-writer.js`
-16. `src/core/run.js`
-17. `src/index.js`
+8. `src/core/update-path.js`
+9. `src/core/data-loader.js`
+10. `src/core/object-meta.js`
+11. `src/core/data-query.js`
+12. `src/runtime/glob.js`
+13. `src/core/template-discovery.js`
+14. `src/core/template-match.js`
+15. `src/core/render-task.js`
+16. `src/core/output-writer.js`
+17. `src/core/run.js`
+18. `src/index.js`
 
 这个顺序保证每一层都建立在前一层已稳定的抽象之上。

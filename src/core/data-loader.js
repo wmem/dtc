@@ -1,5 +1,5 @@
 // 文件说明：
-// 负责执行入口数据脚本，处理 include()/remove()，并构建最终全局对象。
+// 负责执行入口数据脚本，处理 include()/remove()/update()，并构建最终全局对象。
 import * as std from "qjs:std";
 import { isPlainObject } from "../lib/object-kind.js";
 import { readTextFile } from "../runtime/fs.js";
@@ -8,6 +8,7 @@ import { toDebugJsonValue } from "./debug-output.js";
 import { mergeInto } from "./merge.js";
 import { applyObjectMetadata } from "./object-meta.js";
 import { removePath } from "./remove-path.js";
+import { updatePath } from "./update-path.js";
 
 // 把数据脚本改写成可被 std.evalScript 同步执行的形式。
 function transformDataModule(source, filePath) {
@@ -85,8 +86,9 @@ export function buildGlobalData(entryPath, options = {}) {
 
   const previousInclude = globalThis.include;
   const previousRemove = globalThis.remove;
+  const previousUpdate = globalThis.update;
 
-  // include/remove 以临时全局函数形式暴露给数据脚本使用。
+  // include/remove/update 以临时全局函数形式暴露给数据脚本使用。
   globalThis.include = (targetPath) => {
     if (typeof targetPath !== "string" || targetPath.length === 0) {
       throw new Error("include() expects a non-empty path string.");
@@ -105,6 +107,10 @@ export function buildGlobalData(entryPath, options = {}) {
     removePath(state.globalData, dottedPath);
   };
 
+  globalThis.update = (dottedPath, value) => {
+    updatePath(state.globalData, dottedPath, value);
+  };
+
   try {
     loadModule(normalizedEntry, state);
     if (typeof options.onBeforeMetadata === "function") {
@@ -116,5 +122,6 @@ export function buildGlobalData(entryPath, options = {}) {
   } finally {
     globalThis.include = previousInclude;
     globalThis.remove = previousRemove;
+    globalThis.update = previousUpdate;
   }
 }

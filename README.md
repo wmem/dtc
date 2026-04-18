@@ -6,7 +6,7 @@
 
 - 纯 JavaScript 实现，运行时为 QuickJS
 - 使用 `qjs:std`、`qjs:os` 访问 QuickJS 内建能力
-- 支持 `include()` 和 `remove()` 构建全局对象
+- 支持 `include()`、`remove()` 和 `update()` 构建全局对象
 - 支持模板文件通配符搜索
 - 支持对象 `match` 通配符匹配模板文件名
 - 自动为普通对象补充 `name` 和 `parent`
@@ -136,6 +136,8 @@ npm install -g esbuild
 ```js
 include("sub.js");
 remove("modules.obsolete");
+update("modules.detail.title", "detail-updated-by-root");
+update("meta.extra", "added-by-update");
 
 export default {
   meta: {
@@ -152,6 +154,7 @@ export default {
 
 - `include("sub.js")`：按当前脚本所在目录解析相对路径
 - `remove("a.b.c")`：从当前全局对象删除点分路径
+- `update("a.b.c", value)`：更新已有字段，或自动创建缺失路径后写入值
 - 只有 `enable === true` 且 `match` 命中的对象才会参与模板渲染
 - 合并时类型不匹配会报错
 - 数组中的对象不会参与模板匹配遍历
@@ -222,7 +225,7 @@ bin/qjs-linux-x86_64 test/test.js
 
 - 基础渲染流程
 - 调试输出文件
-- `include()` / `remove()`
+- `include()` / `remove()` / `update()`
 - `name` / `parent`
 - 空输出行为
 - 通配符模板匹配

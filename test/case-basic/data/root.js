@@ -1,5 +1,8 @@
 include("sub.js");
 remove("modules.obsolete");
+update("modules.detail.title", "detail-updated-by-root");
+update("meta.extra", "added-by-update");
+update("docs.item.note", "created-before-merge");
 
 export default {
   meta: {
