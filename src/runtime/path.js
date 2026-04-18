@@ -1,12 +1,16 @@
+// 文件说明：
+// 提供跨平台路径处理工具，统一 Linux / Windows 路径规则与比较方式。
 import * as os from "qjs:os";
 
 const WINDOWS_DRIVE_RE = /^[a-zA-Z]:[\\/]/;
 const WINDOWS_UNC_RE = /^\\\\[^\\]+\\[^\\]+/;
 
+// 先把路径分隔符统一成 /，便于后续逻辑处理。
 function toUnixSeparators(path) {
   return String(path).replace(/\\/g, "/");
 }
 
+// 拆出路径根信息，兼容 Linux、Windows 盘符和 UNC 路径。
 function splitRoot(path) {
   const input = toUnixSeparators(path);
 
@@ -34,15 +38,18 @@ function splitRoot(path) {
   return { root: "", rest: input };
 }
 
+// 取得路径根部分，例如 /、c:/ 或 //server/share/。
 export function getPathRoot(path) {
   return splitRoot(path).root;
 }
 
+// 判断路径是否为绝对路径。
 export function isAbsolutePath(path) {
   const input = String(path);
   return input.startsWith("/") || WINDOWS_DRIVE_RE.test(input) || WINDOWS_UNC_RE.test(input);
 }
 
+// 规范化路径，消除重复分隔符、. 和可折叠的 ..。
 export function normalizePath(path) {
   const { root, rest } = splitRoot(path);
   const segments = rest.split("/").filter((segment) => segment.length > 0);
@@ -85,6 +92,7 @@ export function normalizePath(path) {
   });
 }
 
+// 连接多个路径片段，遇到绝对路径时直接重置结果。
 export function joinPath(...parts) {
   const filtered = parts.filter((part) => part !== undefined && part !== null && part !== "");
   if (filtered.length === 0) {
@@ -106,6 +114,7 @@ export function joinPath(...parts) {
   return normalizePath(result);
 }
 
+// 基于 basePath 解析目标路径。
 export function resolvePath(basePath, targetPath) {
   if (!targetPath) {
     return normalizePath(basePath);
@@ -118,6 +127,7 @@ export function resolvePath(basePath, targetPath) {
   return joinPath(basePath, targetPath);
 }
 
+// 获取父目录路径。
 export function dirname(path) {
   const normalized = normalizePath(path);
   const { root } = splitRoot(normalized);
@@ -132,6 +142,7 @@ export function dirname(path) {
   return root ? `${root}${parts.join("/")}` : parts.join("/");
 }
 
+// 获取路径最后一个片段。
 export function basename(path) {
   const normalized = normalizePath(path);
   if (normalized === "/" || /^[a-z]:$/.test(normalized)) {
@@ -141,6 +152,7 @@ export function basename(path) {
   return parts[parts.length - 1];
 }
 
+// 获取文件扩展名。
 export function extname(path) {
   const base = basename(path);
   const index = base.lastIndexOf(".");
@@ -150,6 +162,7 @@ export function extname(path) {
   return base.slice(index);
 }
 
+// 转换成可做去重比较的规范路径。
 export function toComparablePath(path) {
   const normalized = normalizePath(path);
   if (/^[a-z]:/.test(normalized)) {
@@ -161,6 +174,7 @@ export function toComparablePath(path) {
   return normalized;
 }
 
+// 把路径拆成不含根路径的段数组。
 export function splitSegments(path) {
   const normalized = normalizePath(path);
   const { root } = splitRoot(normalized);
@@ -168,6 +182,7 @@ export function splitSegments(path) {
   return body.split("/").filter(Boolean);
 }
 
+// 获取当前工作目录，并统一成规范路径格式。
 export function getCurrentWorkingDirectory() {
   const cwd = os.getcwd();
   if (Array.isArray(cwd)) {

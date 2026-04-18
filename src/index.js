@@ -1,6 +1,9 @@
+// 文件说明：
+// CLI 入口，负责读取命令行参数、调用主流程并统一处理错误输出。
 import * as std from "qjs:std";
 import { run } from "./core/run.js";
 
+// 输出命令行用法说明。
 function printUsage() {
   const message = "Usage: dtc <config-file>\n";
   if (std.err) {
@@ -16,6 +19,7 @@ function printUsage() {
   }
 }
 
+// 输出错误信息，优先写到标准错误。
 function printError(error) {
   const message = `${error.message}\n`;
   if (std.err) {
@@ -31,6 +35,7 @@ function printError(error) {
   }
 }
 
+// 兼容 QuickJS 直接执行脚本和编译后二进制两种参数形式。
 function getArgs() {
   if (typeof scriptArgs !== "undefined" && Array.isArray(scriptArgs)) {
     const args = scriptArgs.slice();

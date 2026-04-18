@@ -1,5 +1,8 @@
+// 文件说明：
+// 按点分路径从全局对象中删除字段，用于实现 remove()。
 import { isPlainObject } from "../lib/object-kind.js";
 
+// 删除目标对象上的点分路径字段，不存在时静默忽略。
 export function removePath(target, dottedPath) {
   if (!dottedPath || typeof dottedPath !== "string") {
     throw new Error("remove() expects a non-empty dotted path string.");
