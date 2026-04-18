@@ -1,0 +1,1 @@
+SELECTED|<%= item.title %>

@@ -1,3 +1,5 @@
+import * as os from "qjs:os";
+
 const WINDOWS_DRIVE_RE = /^[a-zA-Z]:[\\/]/;
 const WINDOWS_UNC_RE = /^\\\\[^\\]+\\[^\\]+/;
 
@@ -167,9 +169,6 @@ export function splitSegments(path) {
 }
 
 export function getCurrentWorkingDirectory() {
-  if (typeof os === "undefined" || typeof os.getcwd !== "function") {
-    throw new Error("QuickJS os.getcwd is not available. Please run with --std enabled.");
-  }
   const cwd = os.getcwd();
   if (Array.isArray(cwd)) {
     return normalizePath(cwd[0]);

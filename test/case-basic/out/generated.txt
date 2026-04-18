@@ -1,0 +1,3 @@
+DETAIL|name=detail|parent=modules|title=detail-from-sub|version=1.0.0
+DETAIL|name=item|parent=docs|title=detail-from-root|version=1.0.0
+MAIN|name=modules|parent=root|title=main-from-root|version=1.0.0

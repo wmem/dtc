@@ -1,18 +1,6 @@
-import { dirname, normalizePath, splitSegments } from "./path.js";
-
-function requireStd() {
-  if (typeof std === "undefined") {
-    throw new Error("QuickJS std is not available. Please run with --std enabled.");
-  }
-  return std;
-}
-
-function requireOs() {
-  if (typeof os === "undefined") {
-    throw new Error("QuickJS os is not available. Please run with --std enabled.");
-  }
-  return os;
-}
+import * as std from "qjs:std";
+import * as os from "qjs:os";
+import { dirname, normalizePath } from "./path.js";
 
 function decodeStatus(result, action, path) {
   if (!Array.isArray(result) || result.length < 2) {
@@ -27,7 +15,7 @@ function decodeStatus(result, action, path) {
 }
 
 export function readTextFile(path) {
-  const text = requireStd().loadFile(path);
+  const text = std.loadFile(path);
   if (text === null) {
     throw new Error(`Unable to read file: ${path}`);
   }
@@ -35,7 +23,7 @@ export function readTextFile(path) {
 }
 
 export function writeTextFile(path, content) {
-  const file = requireStd().open(path, "w");
+  const file = std.open(path, "w");
   if (!file) {
     throw new Error(`Unable to open file for writing: ${path}`);
   }
@@ -49,11 +37,11 @@ export function writeTextFile(path, content) {
 }
 
 export function statPath(path) {
-  return decodeStatus(requireOs().stat(path), "stat", path);
+  return decodeStatus(os.stat(path), "stat", path);
 }
 
 export function pathExists(path) {
-  const result = requireOs().stat(path);
+  const result = os.stat(path);
   return Array.isArray(result) ? result[1] === 0 : !!result;
 }
 
@@ -63,7 +51,7 @@ export function isDirectory(path) {
 }
 
 export function readDirectory(path) {
-  const entries = decodeStatus(requireOs().readdir(path), "readdir", path);
+  const entries = decodeStatus(os.readdir(path), "readdir", path);
   return entries.filter((entry) => entry !== "." && entry !== "..");
 }
 
@@ -85,7 +73,7 @@ export function ensureDirectory(path) {
     return;
   }
 
-  const result = requireOs().mkdir(normalized, 0o755);
+  const result = os.mkdir(normalized, 0o755);
   if (result && result !== 0) {
     throw new Error(`mkdir failed for ${normalized}: errno ${result}`);
   }

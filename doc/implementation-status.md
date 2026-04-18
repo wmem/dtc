@@ -14,7 +14,7 @@
 | --- | --- | --- |
 | QuickJS 下加载 EJS | done | `src/ejs/ejs-wrapper.js` 已接入正式渲染流程，模板任务通过它调用 `ejs.render()`。 |
 | 构建 bundle | done | `pbuild.sh` 已可用 `esbuild` 打包完整 CLI。 |
-| 编译可执行文件 | partial | `pbuild.sh` 可以产出 `build/dtc` 和 `build/dtc.exe`，但当前 QuickJS-ng 独立可执行文件不暴露 `std/os`，无法完成文件系统主流程。 |
+| 编译可执行文件 | done | `pbuild.sh` 可以产出 `build/dtc` 和 `build/dtc.exe`，并支持通过 `qjs:std` / `qjs:os` 内建模块访问运行时能力。 |
 | CLI 参数处理 | done | `src/index.js` 已实现参数解析和用法提示。 |
 | 配置读取与校验 | done | `src/core/config.js` 已实现 `data` / `tpl` 的解析、校验和输出冲突检查。 |
 | 路径归一化 | done | `src/runtime/path.js` 已实现跨平台路径规范化、绝对路径判断和比较键。 |
@@ -28,7 +28,7 @@
 | `match` 数据搜索 | done | `src/core/data-query.js` 已按“只遍历普通对象、不进入数组”实现搜索。 |
 | EJS 正式渲染上下文 | done | 已按 `item/parent/root/template/output` 提供上下文。 |
 | 输出聚合与写盘 | done | 已实现片段拼接、目录创建和最终写入。 |
-| 错误处理与退出码 | partial | 源码模式和 `qjs --std build/bundle.js` 可给出清晰错误，但独立可执行文件受 QuickJS-ng `std/os` 限制。 |
+| 错误处理与退出码 | done | 源码模式、bundle 模式和独立可执行文件都能给出清晰错误并以非零状态退出。 |
 
 ## 当前代码现状
 
@@ -48,13 +48,13 @@
 
 - 已固定 `esbuild -> qjs` 的构建链路。
 - 默认输出 `build/dtc` 和 `build/dtc.exe`。
-- `build/bundle.js` 可通过 `bin/qjs-linux-x86_64 --std` 正常运行。
-- 当前 `qjs -c` 生成的独立可执行文件不提供 `std/os`，因此不能直接支撑文件系统主流程。
+- `build/bundle.js` 可直接通过 `bin/qjs-linux-x86_64` 正常运行。
+- 独立可执行文件通过 `qjs:std` / `qjs:os` 内建模块访问 QuickJS 运行时能力。
 
 ## 推荐下一步
 
-1. 如果要继续交付真正可独立运行的二进制，需要确认 QuickJS-ng 独立程序如何启用 `std/os`，或替换打包策略。
-2. 为核心模块补充自动化测试样例，尤其是路径归一化、深合并、glob 和数据加载顺序。
+1. 为核心模块补充自动化测试样例，尤其是路径归一化、深合并、glob 和数据加载顺序。
+2. 增加一个最小示例工程，便于验证模板渲染输出。
 3. 如需扩展模板能力，再讨论 helper、separator、encoding 等未来字段。
 
 ## 更新规则

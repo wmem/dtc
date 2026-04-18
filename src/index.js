@@ -1,8 +1,9 @@
+import * as std from "qjs:std";
 import { run } from "./core/run.js";
 
 function printUsage() {
   const message = "Usage: dtc <config-file>\n";
-  if (typeof std !== "undefined" && std.err) {
+  if (std.err) {
     std.err.puts(message);
     return;
   }
@@ -17,7 +18,7 @@ function printUsage() {
 
 function printError(error) {
   const message = `${error.message}\n`;
-  if (typeof std !== "undefined" && std.err) {
+  if (std.err) {
     std.err.puts(message);
     return;
   }
@@ -33,7 +34,7 @@ function printError(error) {
 function getArgs() {
   if (typeof scriptArgs !== "undefined" && Array.isArray(scriptArgs)) {
     const args = scriptArgs.slice();
-    if (args.length >= 2) {
+    if (args.length >= 1) {
       const first = String(args[0]);
       if (first.endsWith(".js") || first.endsWith(".mjs")) {
         return args.slice(1);
@@ -48,11 +49,12 @@ try {
   const args = getArgs();
   if (args.length !== 1) {
     printUsage();
-    throw new Error("Invalid arguments.");
+    printError(new Error("Invalid arguments."));
+    std.exit(1);
   }
 
   run(args[0]);
 } catch (error) {
   printError(error);
-  throw error;
+  std.exit(1);
 }

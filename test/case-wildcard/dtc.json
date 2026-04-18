@@ -1,0 +1,11 @@
+{
+  "data": "data/root.js",
+  "tpl": [
+    {
+      "files": [
+        "tpl/**/*.tpl"
+      ],
+      "out": "out/generated.txt"
+    }
+  ]
+}

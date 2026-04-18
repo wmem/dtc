@@ -1,15 +1,10 @@
+import * as std from "qjs:std";
 import { isPlainObject } from "../lib/object-kind.js";
 import { readTextFile } from "../runtime/fs.js";
 import { dirname, normalizePath, resolvePath, toComparablePath } from "../runtime/path.js";
 import { mergeInto } from "./merge.js";
 import { applyObjectMetadata } from "./object-meta.js";
 import { removePath } from "./remove-path.js";
-
-function requireStdEval() {
-  if (typeof std === "undefined" || typeof std.evalScript !== "function") {
-    throw new Error("QuickJS std.evalScript is not available. Please run with --std enabled.");
-  }
-}
 
 function transformDataModule(source, filePath) {
   const exportRegex = /\bexport\s+default\b/;
@@ -33,7 +28,6 @@ function transformDataModule(source, filePath) {
 }
 
 function executeDataModule(filePath) {
-  requireStdEval();
   const source = readTextFile(filePath);
   const wrappedSource = transformDataModule(source, filePath);
   return std.evalScript(wrappedSource);

@@ -1,0 +1,4 @@
+XRAY|alpha|alpha
+XRAY|beta|beta
+XRAY|nested|nested
+BASE|beta|beta
