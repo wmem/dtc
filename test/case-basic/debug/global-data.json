@@ -1,4 +1,14 @@
 {
+  "lookup": {
+    "items": [
+      {
+        "name": "first-item"
+      },
+      {
+        "name": "second-item"
+      }
+    ]
+  },
   "modules": {
     "detail": {
       "enable": true,
@@ -17,6 +27,8 @@
   ],
   "meta": {
     "extra": "added-by-update",
+    "detailTitleBeforeUpdate": "detail-from-sub",
+    "secondLookupName": "second-item",
     "version": "1.0.0"
   },
   "docs": {

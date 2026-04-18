@@ -22,6 +22,7 @@
 | `include()` | done | 已支持同步包含、相对路径解析和循环包含检测。 |
 | `remove()` | done | 已支持点分路径删除。 |
 | `update()` | done | 已支持点分路径更新与缺失路径自动创建。 |
+| `get()` | done | 已支持点分路径读取，且允许通过数字下标访问数组项。 |
 | 深合并规则 | done | `src/core/merge.js` 已实现深合并与类型不匹配报错。 |
 | 对象关系字段补充 | done | `src/core/object-meta.js` 已补充 `name` 与 `parent`。 |
 | 模板 glob 搜索 | done | `src/runtime/glob.js` 与 `src/core/template-discovery.js` 已实现模板发现与去重。 |

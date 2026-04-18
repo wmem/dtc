@@ -62,6 +62,8 @@ function runBasicCase(projectRoot) {
   assert(rootData.modules.obsolete === undefined, "remove() 应删除 modules.obsolete");
   assert(rootData.modules.detail.title === "detail-updated-by-root", "update() 应能更新已有字段");
   assert(rootData.meta.extra === "added-by-update", "update() 应能创建缺失的中间对象和字段");
+  assert(rootData.meta.detailTitleBeforeUpdate === "detail-from-sub", "get() 应能读取当前全局对象中的已有字段");
+  assert(rootData.meta.secondLookupName === "second-item", "get() 应支持读取数组项路径");
   assert(rootData.docs.item.note === "created-before-merge", "update() 应能在默认导出合并前创建路径");
   assert(rootData.docs.item.parent === rootData.docs, "子对象 parent 应正确指向父对象");
   assert(matchedObjects.length === 3, "应只找到 3 个可渲染对象，数组中的对象不能参与遍历");
@@ -83,6 +85,8 @@ function runBasicCase(projectRoot) {
   assert(debugData.modules.obsolete === undefined, "全局对象调试输出应体现 remove() 的结果");
   assert(debugData.modules.detail.title === "detail-updated-by-root", "全局对象调试输出应体现 update() 的更新结果");
   assert(debugData.meta.extra === "added-by-update", "全局对象调试输出应体现 update() 的新增结果");
+  assert(debugData.meta.detailTitleBeforeUpdate === "detail-from-sub", "全局对象调试输出应保留 get() 读取到的对象字段");
+  assert(debugData.meta.secondLookupName === "second-item", "全局对象调试输出应保留 get() 读取到的数组项");
   assert(debugData.docs.item.note === "created-before-merge", "全局对象调试输出应保留 update() 新建的路径");
   assert(debugData.docs.item.title === "detail-from-root", "全局对象调试输出应包含合并后的数据");
 
@@ -142,6 +146,18 @@ function runEnableFilterCase(projectRoot) {
   assert(rendered === expected, `enable 过滤输出不符合预期。\n--- expected ---\n${expected}\n--- actual ---\n${rendered}`);
 }
 
+function runGetMissingCase(projectRoot) {
+  const caseDir = `${projectRoot}/test/case-get-missing`;
+  const configPath = `${caseDir}/dtc.json`;
+  const config = loadConfig(configPath);
+
+  expectThrows(
+    () => buildGlobalData(config.dataEntry),
+    "get() path does not exist: meta",
+    "get() 读取不存在路径时应直接报错"
+  );
+}
+
 function runTypeMismatchCase(projectRoot) {
   const caseDir = `${projectRoot}/test/case-type-mismatch`;
   const configPath = `${caseDir}/dtc.json`;
@@ -180,6 +196,9 @@ function main() {
 
   runEnableFilterCase(projectRoot);
   console.log("case-enable-filter passed");
+
+  runGetMissingCase(projectRoot);
+  console.log("case-get-missing passed");
 
   runTypeMismatchCase(projectRoot);
   console.log("case-type-mismatch passed");

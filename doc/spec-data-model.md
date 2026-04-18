@@ -1,6 +1,6 @@
 # 数据模型与脚本执行规格
 
-本文档定义入口数据脚本、`include()`、`remove()`、`update()` 和最终全局对象的构建规则。
+本文档定义入口数据脚本、`include()`、`remove()`、`update()`、`get()` 和最终全局对象的构建规则。
 
 ## 基本模型
 
@@ -14,7 +14,7 @@
 1. 加载入口文件。
 2. 执行入口文件顶层代码。
 3. 若顶层代码调用 `include()`，立即处理被包含文件。
-4. 顶层代码中的 `remove()` 与 `update()` 立即作用于当前全局对象。
+4. 顶层代码中的 `remove()`、`update()` 与 `get()` 立即作用于当前全局对象。
 5. 当前文件顶层执行结束后，将其默认导出的对象合并到全局对象。
 6. 入口文件及其递归包含的所有文件处理完成后，得到最终全局对象。
 
@@ -73,6 +73,26 @@
 - 如果中间路径不存在，则自动创建普通对象。
 - 如果中间路径存在但不是普通对象，则直接报错。
 - `value` 可以是任意可放入全局对象的 JavaScript 值。
+
+## `get(path)`
+
+### 作用
+
+读取当前全局对象上的指定路径，并返回该路径对应的值。
+
+### 路径格式
+
+- `get()` 接受点分路径字符串，例如 `meta.version`。
+- 支持读取数组项，例如 `items.0.name`。
+- 不支持默认值参数。
+- 不支持通配符。
+
+### 行为规则
+
+- 如果路径存在，则返回该路径上的值。
+- 如果路径不存在，则直接报错。
+- 如果路径中包含数组，则对应路径段必须是数字下标。
+- 如果遍历过程中遇到非对象、非数组值但路径还未结束，则直接报错。
 
 ## 合并规则
 
@@ -133,10 +153,18 @@ export default {
 // root.js
 include("sub.js");
 remove("test.test1");
+const titleBeforeUpdate = get("test.test2.test3");
+const secondName = get("items.1.name");
 update("test.test2.test3", "from-update");
 update("meta.version", "1.0.0");
+update("meta.previousTitle", titleBeforeUpdate);
+update("meta.secondName", secondName);
 
 export default {
+  items: [
+    { name: "first" },
+    { name: "second" }
+  ],
   meta: {
     extra: "created"
   },
@@ -154,8 +182,14 @@ export default {
 {
   meta: {
     version: "1.0.0",
-    extra: "created"
+    extra: "created",
+    previousTitle: "kkk",
+    secondName: "second"
   },
+  items: [
+    { name: "first" },
+    { name: "second" }
+  ],
   test: {
     test2: {
       test3: "45555"
@@ -182,4 +216,5 @@ export default {
 - `src/core/object-meta.js`：负责补充 `name` 与 `parent`。
 - `src/core/remove-path.js`：负责点分路径删除。
 - `src/core/update-path.js`：负责点分路径更新与新增。
+- `src/core/get-path.js`：负责点分路径读取。
 - `src/core/data-query.js`：负责递归搜集带 `match` 的对象。

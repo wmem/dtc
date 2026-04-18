@@ -1,4 +1,14 @@
 export default {
+  lookup: {
+    items: [
+      {
+        name: "first-item"
+      },
+      {
+        name: "second-item"
+      }
+    ]
+  },
   modules: {
     obsolete: "remove-me",
     detail: {

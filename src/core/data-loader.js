@@ -1,10 +1,11 @@
 // 文件说明：
-// 负责执行入口数据脚本，处理 include()/remove()/update()，并构建最终全局对象。
+// 负责执行入口数据脚本，处理 include()/remove()/update()/get()，并构建最终全局对象。
 import * as std from "qjs:std";
 import { isPlainObject } from "../lib/object-kind.js";
 import { readTextFile } from "../runtime/fs.js";
 import { dirname, normalizePath, resolvePath, toComparablePath } from "../runtime/path.js";
 import { toDebugJsonValue } from "./debug-output.js";
+import { getPath } from "./get-path.js";
 import { mergeInto } from "./merge.js";
 import { applyObjectMetadata } from "./object-meta.js";
 import { removePath } from "./remove-path.js";
@@ -87,8 +88,9 @@ export function buildGlobalData(entryPath, options = {}) {
   const previousInclude = globalThis.include;
   const previousRemove = globalThis.remove;
   const previousUpdate = globalThis.update;
+  const previousGet = globalThis.get;
 
-  // include/remove/update 以临时全局函数形式暴露给数据脚本使用。
+  // include/remove/update/get 以临时全局函数形式暴露给数据脚本使用。
   globalThis.include = (targetPath) => {
     if (typeof targetPath !== "string" || targetPath.length === 0) {
       throw new Error("include() expects a non-empty path string.");
@@ -111,6 +113,10 @@ export function buildGlobalData(entryPath, options = {}) {
     updatePath(state.globalData, dottedPath, value);
   };
 
+  globalThis.get = (dottedPath) => {
+    return getPath(state.globalData, dottedPath);
+  };
+
   try {
     loadModule(normalizedEntry, state);
     if (typeof options.onBeforeMetadata === "function") {
@@ -123,5 +129,6 @@ export function buildGlobalData(entryPath, options = {}) {
     globalThis.include = previousInclude;
     globalThis.remove = previousRemove;
     globalThis.update = previousUpdate;
+    globalThis.get = previousGet;
   }
 }
