@@ -4,6 +4,7 @@ import * as std from "qjs:std";
 import { isPlainObject } from "../lib/object-kind.js";
 import { readTextFile } from "../runtime/fs.js";
 import { dirname, normalizePath, resolvePath, toComparablePath } from "../runtime/path.js";
+import { toDebugJsonValue } from "./debug-output.js";
 import { mergeInto } from "./merge.js";
 import { applyObjectMetadata } from "./object-meta.js";
 import { removePath } from "./remove-path.js";
@@ -73,7 +74,7 @@ function loadModule(filePath, state) {
 }
 
 // 从入口文件开始构建最终全局对象，并注入对象元信息。
-export function buildGlobalData(entryPath) {
+export function buildGlobalData(entryPath, options = {}) {
   const normalizedEntry = normalizePath(entryPath);
   const state = {
     globalData: {},
@@ -106,6 +107,10 @@ export function buildGlobalData(entryPath) {
 
   try {
     loadModule(normalizedEntry, state);
+    if (typeof options.onBeforeMetadata === "function") {
+      // 此时对象树还未注入 parent/name，可直接导出为无循环引用的快照。
+      options.onBeforeMetadata(toDebugJsonValue(state.globalData));
+    }
     applyObjectMetadata(state.globalData);
     return state.globalData;
   } finally {

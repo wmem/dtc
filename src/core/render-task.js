@@ -3,16 +3,22 @@
 import ejs from "../ejs/ejs-wrapper.js";
 import { basename } from "../runtime/path.js";
 import { readTextFile } from "../runtime/fs.js";
+import { toDebugJsonValue } from "./debug-output.js";
 import { matchesTemplate } from "./template-match.js";
 
 // 渲染一个模板任务，返回最终应写入输出文件的文本内容。
 export function renderTask(rootData, matchedObjects, templateFiles, outputFile) {
   const fragments = [];
+  const debugEntries = [];
 
   for (const templatePath of templateFiles) {
     const templateName = basename(templatePath);
     const templateContent = readTextFile(templatePath);
     const matchedItems = matchedObjects.filter((item) => matchesTemplate(item, templateName));
+    debugEntries.push({
+      templatePath,
+      matchedObjects: matchedItems.map((item) => toDebugJsonValue(item, { ignoreKeys: new Set(["parent"]) })),
+    });
 
     for (const item of matchedItems) {
       try {
@@ -36,5 +42,8 @@ export function renderTask(rootData, matchedObjects, templateFiles, outputFile) 
     }
   }
 
-  return fragments.join("\n");
+  return {
+    content: fragments.join("\n"),
+    debugEntries,
+  };
 }

@@ -7,6 +7,8 @@
 ```json
 {
   "data": "data/root.js",
+  "debugDataOut": "debug/global-data.json",
+  "debugMatchOut": "debug/match-data.json",
   "tpl": [
     {
       "files": [
@@ -34,6 +36,28 @@
 - 必填：是
 - 含义：模板输出任务列表。
 - 约束：至少包含一个元素。
+
+### `debugDataOut`
+
+- 类型：`string`
+- 必填：否
+- 含义：最终全局对象的调试输出文件路径。
+- 解析基准：相对于配置文件所在目录。
+- 规则：
+  - 未配置、`null` 或空字符串时，不输出。
+  - 输出内容为 JSON。
+  - 必须在注入 `name` / `parent` 之前输出，避免循环引用。
+
+### `debugMatchOut`
+
+- 类型：`string`
+- 必填：否
+- 含义：模板文件与命中对象信息的调试输出文件路径。
+- 解析基准：相对于配置文件所在目录。
+- 规则：
+  - 未配置、`null` 或空字符串时，不输出。
+  - 输出内容为 JSON。
+  - 每条记录至少包含模板文件路径和命中的对象数据列表。
 
 ### `tpl[].files`
 
@@ -76,6 +100,7 @@
 4. 每个 `tpl` 元素必须是对象。
 5. 每个 `tpl.files` 必须是非空字符串数组。
 6. 每个 `tpl.out` 必须是非空字符串。
+7. `debugDataOut` 和 `debugMatchOut` 如果配置，必须是字符串或空字符串。
 
 任一校验失败都应立刻报错并停止执行。
 
@@ -87,6 +112,7 @@
 - 配置中允许同时出现 `/` 与 `\\` 作为分隔符，但内部必须归一化后再比较和存储。
 - 路径比较必须使用统一的规范化结果，不能直接用原始字符串比较。
 - `out` 的父目录如果不存在，应在写入前自动创建。
+- `debugDataOut` 和 `debugMatchOut` 的父目录如果不存在，也应在写入前自动创建。
 - 如果两个不同的 `tpl` 任务解析后指向同一个绝对输出路径，视为配置错误，直接失败。
 
 ## 模式匹配实现约束
@@ -103,6 +129,8 @@
   configFile: "/abs/project/dtc.json",
   configDir: "/abs/project",
   dataEntry: "/abs/project/data/root.js",
+  debugDataOut: "/abs/project/debug/global-data.json",
+  debugMatchOut: "/abs/project/debug/match-data.json",
   tasks: [
     {
       filePatterns: ["tpl/*.tpl", "tpl/common/header.tpl"],

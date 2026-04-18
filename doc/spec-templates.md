@@ -66,10 +66,37 @@
 对每个模板文件执行以下流程：
 
 1. 收集所有命中的数据对象。
-2. 按搜索顺序逐个渲染模板。
-3. 每个命中的数据对象独立渲染一次。
+2. 如果配置了 `debugMatchOut`，记录当前模板文件路径与命中对象数据。
+3. 按搜索顺序逐个渲染模板。
+4. 每个命中的数据对象独立渲染一次。
 
 如果一个模板文件命中了三个对象，则该模板会被渲染三次。
+
+## 模板调试输出
+
+如果配置了 `debugMatchOut`，建议输出如下结构：
+
+```js
+[
+  {
+    templatePath: "/abs/project/tpl/detail.tpl",
+    matchedObjects: [
+      {
+        name: "detail",
+        match: "detail.tpl",
+        title: "detail-from-sub"
+      }
+    ]
+  }
+]
+```
+
+规则：
+
+- `templatePath` 使用模板绝对路径。
+- `matchedObjects` 按当前模板的命中顺序输出。
+- 输出对象时应避免把 `parent` 写入 JSON，防止循环引用。
+- `name` 等普通字段可以保留，便于调试。
 
 ## 输出聚合规则
 

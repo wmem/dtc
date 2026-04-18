@@ -100,6 +100,8 @@ npm install -g esbuild
 ```json
 {
   "data": "data/root.js",
+  "debugDataOut": "debug/global-data.json",
+  "debugMatchOut": "debug/match-data.json",
   "tpl": [
     {
       "files": [
@@ -114,8 +116,16 @@ npm install -g esbuild
 字段说明：
 
 - `data`：入口数据脚本，相对于配置文件所在目录
+- `debugDataOut`：可选，全局对象调试输出文件；为空或未配置则不输出
+- `debugMatchOut`：可选，模板与命中对象调试输出文件；为空或未配置则不输出
 - `tpl[].files`：模板文件模式列表，支持 `*`、`?`、`**`
 - `tpl[].out`：输出文件路径，相对于配置文件所在目录
+
+调试输出说明：
+
+- `debugDataOut` 输出的是补充 `name` / `parent` 之前的全局对象 JSON 快照
+- `debugMatchOut` 输出的是模板路径和命中对象数据列表
+- 模板调试对象默认不写入 `parent`，避免循环引用
 
 ## 数据脚本约定
 
@@ -210,6 +220,7 @@ bin/qjs-linux-x86_64 test/test.js
 当前测试覆盖：
 
 - 基础渲染流程
+- 调试输出文件
 - `include()` / `remove()`
 - `name` / `parent`
 - 空输出行为

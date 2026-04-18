@@ -1,0 +1,25 @@
+{
+  "modules": {
+    "detail": {
+      "match": "detail.tpl",
+      "title": "detail-from-sub"
+    },
+    "match": "main.tpl",
+    "title": "main-from-root"
+  },
+  "ignoredList": [
+    {
+      "match": "list.tpl",
+      "title": "should-not-render"
+    }
+  ],
+  "meta": {
+    "version": "1.0.0"
+  },
+  "docs": {
+    "item": {
+      "match": "detail.tpl",
+      "title": "detail-from-root"
+    }
+  }
+}

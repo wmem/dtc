@@ -20,6 +20,16 @@ function isNonEmptyString(value) {
   return typeof value === "string" && value.length > 0;
 }
 
+// 解析可选调试输出路径，未配置或为空字符串时返回 undefined。
+function resolveOptionalPath(configDir, value) {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  assert(isNonEmptyString(value), "Optional debug output path must be a string when provided.");
+  return resolvePath(configDir, value);
+}
+
 // 加载配置文件并转换为内部统一使用的结构。
 export function loadConfig(configArg) {
   assert(isNonEmptyString(configArg), "Missing config file path.");
@@ -69,6 +79,8 @@ export function loadConfig(configArg) {
     configFile,
     configDir,
     dataEntry: resolvePath(configDir, parsed.data),
+    debugDataOut: resolveOptionalPath(configDir, parsed.debugDataOut),
+    debugMatchOut: resolveOptionalPath(configDir, parsed.debugMatchOut),
     tasks,
   };
 }

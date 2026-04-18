@@ -1,0 +1,32 @@
+[
+  {
+    "templatePath": "/home/mem/project/mem/dtc/test/case-basic/tpl/detail.tpl",
+    "matchedObjects": [
+      {
+        "match": "detail.tpl",
+        "title": "detail-from-sub",
+        "name": "detail"
+      },
+      {
+        "match": "detail.tpl",
+        "title": "detail-from-root",
+        "name": "item"
+      }
+    ]
+  },
+  {
+    "templatePath": "/home/mem/project/mem/dtc/test/case-basic/tpl/main.tpl",
+    "matchedObjects": [
+      {
+        "detail": {
+          "match": "detail.tpl",
+          "title": "detail-from-sub",
+          "name": "detail"
+        },
+        "match": "main.tpl",
+        "title": "main-from-root",
+        "name": "modules"
+      }
+    ]
+  }
+]

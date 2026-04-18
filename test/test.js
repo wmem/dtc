@@ -48,6 +48,8 @@ function runBasicCase(projectRoot) {
   const caseDir = `${projectRoot}/test/case-basic`;
   const configPath = `${caseDir}/dtc.json`;
   const outputPath = `${caseDir}/out/generated.txt`;
+  const debugDataPath = `${caseDir}/debug/global-data.json`;
+  const debugMatchPath = `${caseDir}/debug/match-data.json`;
 
   const config = loadConfig(configPath);
   const rootData = buildGlobalData(config.dataEntry);
@@ -71,6 +73,21 @@ function runBasicCase(projectRoot) {
   ].join("\n");
 
   assert(rendered === expected, `输出不符合预期。\n--- expected ---\n${expected}\n--- actual ---\n${rendered}`);
+
+  const debugData = JSON.parse(readTextFile(debugDataPath));
+  assert(debugData.name === undefined, "全局对象调试输出应在注入 name 前生成");
+  assert(debugData.parent === undefined, "全局对象调试输出不应包含 parent");
+  assert(debugData.modules.obsolete === undefined, "全局对象调试输出应体现 remove() 的结果");
+  assert(debugData.docs.item.title === "detail-from-root", "全局对象调试输出应包含合并后的数据");
+
+  const debugMatch = JSON.parse(readTextFile(debugMatchPath));
+  assert(Array.isArray(debugMatch) && debugMatch.length === 2, "模板调试输出应包含 2 个模板记录");
+  assert(debugMatch[0].templatePath.endsWith("/detail.tpl"), "第一个模板调试记录应为 detail.tpl");
+  assert(debugMatch[0].matchedObjects.length === 2, "detail.tpl 应命中 2 个对象");
+  assert(debugMatch[0].matchedObjects[0].parent === undefined, "模板调试输出中的对象不应包含 parent，避免循环引用");
+  assert(debugMatch[1].templatePath.endsWith("/main.tpl"), "第二个模板调试记录应为 main.tpl");
+  assert(debugMatch[1].matchedObjects.length === 1, "main.tpl 应命中 1 个对象");
+  assert(debugMatch[1].matchedObjects[0].name === "modules", "模板调试输出应保留 name 信息");
 }
 
 function runEmptyOutputCase(projectRoot) {
