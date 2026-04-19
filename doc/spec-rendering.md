@@ -38,7 +38,7 @@ ejs.render(templateContent, renderContext)
 ### 字段含义
 
 - `item`：当前命中的数据对象。
-- `parent`：当前命中对象的父对象，根对象时为 `undefined`。
+- `parent`：当前命中对象的父对象，根对象时为 `undefined`。该值只存在于渲染上下文中，不写回 `item` 本身。
 - `root`：最终全局对象。
 - `template.name`：模板基础文件名。
 - `template.path`：模板绝对路径。

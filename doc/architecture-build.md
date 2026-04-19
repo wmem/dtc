@@ -50,7 +50,7 @@
   - 深合并对象。
   - 类型不匹配时报错。
 - `src/core/object-meta.js`
-  - 为普通对象补充 `name` 与 `parent`。
+  - 为普通对象补充 `name`。
 - `src/core/remove-path.js`
   - 删除点分路径。
 - `src/core/update-path.js`

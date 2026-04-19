@@ -62,16 +62,16 @@ function runBasicCase(projectRoot) {
   const matchedObjects = collectMatchedObjects(rootData);
 
   assert(rootData.name === "root", "根对象 name 应为 root");
-  assert(rootData.parent === undefined, "根对象 parent 应为 undefined");
+  assert(rootData.parent === undefined, "全局对象本身不应注入 parent 字段");
   assert(rootData.modules.name === "modules", "modules.name 应自动补成 modules");
-  assert(rootData.modules.parent === rootData, "modules.parent 应指向根对象");
+  assert(rootData.modules.parent === undefined, "普通对象本身不应注入 parent 字段");
   assert(rootData.modules.obsolete === undefined, "remove() 应删除 modules.obsolete");
   assert(rootData.modules.detail.title === "detail-updated-by-root", "update() 应能更新已有字段");
   assert(rootData.meta.extra === "added-by-update", "update() 应能创建缺失的中间对象和字段");
   assert(rootData.meta.detailTitleBeforeUpdate === "detail-from-sub", "get() 应能读取当前全局对象中的已有字段");
   assert(rootData.meta.secondLookupName === "second-item", "get() 应支持读取数组项路径");
   assert(rootData.docs.item.note === "created-before-merge", "update() 应能在默认导出合并前创建路径");
-  assert(rootData.docs.item.parent === rootData.docs, "子对象 parent 应正确指向父对象");
+  assert(rootData.docs.item.parent === undefined, "子对象本身也不应注入 parent 字段");
   assert(matchedObjects.length === 3, "应只找到 3 个可渲染对象，数组中的对象不能参与遍历");
 
   run(configPath);

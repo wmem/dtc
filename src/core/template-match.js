@@ -3,6 +3,7 @@
 import { matchSegment } from "../lib/pattern.js";
 
 // 判断单个对象是否应参与当前模板文件的渲染。
-export function matchesTemplate(item, templateName) {
+export function matchesTemplate(entry, templateName) {
+  const item = entry.item;
   return item.enable === true && typeof item.match === "string" && item.match.length > 0 && matchSegment(templateName, item.match);
 }

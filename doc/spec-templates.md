@@ -126,7 +126,7 @@
 ```js
 {
   item: matchedObject,
-  parent: matchedObject.parent,
+  parent: parentObject,
   root: finalDataObject,
   template: {
     name: "abc.tpl",

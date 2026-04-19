@@ -9,7 +9,7 @@
 - 支持 `include()`、`remove()`、`update()` 和 `get()` 构建全局对象
 - 支持模板文件通配符搜索
 - 支持对象 `match` 通配符匹配模板文件名
-- 自动为普通对象补充 `name` 和 `parent`
+- 自动为普通对象补充 `name`，并在模板渲染时提供 `parent`
 - 支持打包为 Linux / Windows 可执行文件
 
 ## 版本管理
@@ -43,7 +43,7 @@ bin/qjs-linux-x86_64 src/index.js --version
 - 配置读取与校验
 - 数据脚本执行、`include()`、`remove()`
 - 全局对象深合并与类型冲突报错
-- `name` / `parent` 元信息补充
+- `name` 元信息补充与渲染期 `parent`
 - 模板发现、`match` 匹配与 EJS 渲染
 - 输出写盘
 - 打包为 `build/bundle.js`、`build/dtc`、`build/dtc.exe`
@@ -78,11 +78,12 @@ bin/qjs-linux-x86_64 src/index.js --version
 2. 执行 `data` 指定的入口脚本
 3. 在执行期间处理 `include()` 和 `remove()`
 4. 合并所有默认导出对象，得到最终全局对象
-5. 为普通对象补充 `name` / `parent`
-6. 按 `tpl[].files` 搜索模板文件
-7. 遍历最终全局对象中带 `match` 的普通对象
-8. 用 EJS 渲染匹配到的模板
-9. 将结果写入 `tpl[].out`
+5. 为普通对象补充 `name`
+6. 在模板渲染时临时提供 `parent`
+7. 按 `tpl[].files` 搜索模板文件
+8. 遍历最终全局对象中带 `match` 的普通对象
+9. 用 EJS 渲染匹配到的模板
+10. 将结果写入 `tpl[].out`
 
 ## 文档导航
 
@@ -139,9 +140,9 @@ npm install -g esbuild
 
 调试输出说明：
 
-- `debugDataOut` 输出的是补充 `name` / `parent` 之前的全局对象 JSON 快照
+- `debugDataOut` 输出的是补充 `name` 之前的全局对象 JSON 快照
 - `debugMatchOut` 输出的是模板路径和命中对象数据列表
-- 模板调试对象默认不写入 `parent`，避免循环引用
+- 模板调试对象默认不写入 `parent`
 
 ## 数据脚本约定
 
@@ -260,7 +261,7 @@ bin/qjs-linux-x86_64 test/test.js
 - 版本号来源
 - 调试输出文件
 - `include()` / `remove()` / `update()` / `get()`
-- `name` / `parent`
+- `name` 与渲染期 `parent`
 - 空输出行为
 - 通配符模板匹配
 - 合并类型冲突

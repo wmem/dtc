@@ -7,24 +7,25 @@ import { toDebugJsonValue } from "./debug-output.js";
 import { matchesTemplate } from "./template-match.js";
 
 // 渲染一个模板任务，返回最终应写入输出文件的文本内容。
-export function renderTask(rootData, matchedObjects, templateFiles, outputFile) {
+export function renderTask(rootData, matchedEntries, templateFiles, outputFile) {
   const fragments = [];
   const debugEntries = [];
 
   for (const templatePath of templateFiles) {
     const templateName = basename(templatePath);
     const templateContent = readTextFile(templatePath);
-    const matchedItems = matchedObjects.filter((item) => matchesTemplate(item, templateName));
+    const matchedItems = matchedEntries.filter((entry) => matchesTemplate(entry, templateName));
     debugEntries.push({
       templatePath,
-      matchedObjects: matchedItems.map((item) => toDebugJsonValue(item, { ignoreKeys: new Set(["parent"]) })),
+      matchedObjects: matchedItems.map((entry) => toDebugJsonValue(entry.item)),
     });
 
-    for (const item of matchedItems) {
+    for (const entry of matchedItems) {
+      const item = entry.item;
       try {
         const rendered = ejs.render(templateContent, {
           item,
-          parent: item.parent,
+          parent: entry.parent,
           root: rootData,
           template: {
             name: templateName,

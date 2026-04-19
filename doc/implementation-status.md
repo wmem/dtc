@@ -25,7 +25,7 @@
 | `update()` | done | 已支持点分路径更新与缺失路径自动创建。 |
 | `get()` | done | 已支持点分路径读取，且允许通过数字下标访问数组项。 |
 | 深合并规则 | done | `src/core/merge.js` 已实现深合并与类型不匹配报错。 |
-| 对象关系字段补充 | done | `src/core/object-meta.js` 已补充 `name` 与 `parent`。 |
+| 对象元信息补充 | done | `src/core/object-meta.js` 已补充 `name`，模板渲染时会临时提供 `parent`。 |
 | 模板 glob 搜索 | done | `src/runtime/glob.js` 与 `src/core/template-discovery.js` 已实现模板发现与去重。 |
 | 通配符公共库 | done | `src/lib/pattern.js` 已供 glob 与 `match` 共享。 |
 | `match` 数据搜索 | done | `src/core/data-query.js` 已按“只遍历普通对象、不进入数组、且要求 enable=true”实现搜索。 |
