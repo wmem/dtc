@@ -13,7 +13,8 @@
     "detail": {
       "enable": true,
       "match": "detail.tpl",
-      "title": "detail-updated-by-root"
+      "title": "detail-updated-by-root",
+      "patchedBySideEffect": "yes"
     },
     "enable": true,
     "match": "main.tpl",
@@ -26,6 +27,7 @@
     }
   ],
   "meta": {
+    "patchedBySideEffect": true,
     "extra": "added-by-update",
     "detailTitleBeforeUpdate": "detail-from-sub",
     "secondLookupName": "second-item",

@@ -29,8 +29,10 @@
   - 检查重复输出路径。
 - `src/app/data/data-loader.js`
   - 执行入口数据脚本。
-  - 暴露 `include()` / `remove()` / `update()` / `get()`。
+  - 暴露 `include()` / `remove()` / `replace()` / `update()` / `get()`。
   - 管理加载栈和已加载集合。
+- `src/app/data/replace-path.js`
+  - 按点分路径直接替换值。
 - `src/app/data/merge.js`
   - 深合并对象。
   - 类型不匹配时报错。
@@ -39,7 +41,7 @@
 - `src/app/data/remove-path.js`
   - 删除点分路径。
 - `src/app/data/update-path.js`
-  - 更新或新增点分路径。
+  - 以对象补丁方式更新或新增点分路径。
 - `src/app/data/get-path.js`
   - 读取点分路径，支持数组下标访问。
 - `src/app/data/data-query.js`

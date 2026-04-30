@@ -1,11 +1,11 @@
 # 数据模型与脚本执行规格
 
-本文档定义入口数据脚本、`include()`、`remove()`、`update()`、`get()` 和最终全局对象的构建规则。
+本文档定义入口数据脚本、`include()`、`remove()`、`replace()`、`update()`、`get()` 和最终全局对象的构建规则。
 
 ## 基本模型
 
 - 每个数据文件都是一个 ES Module。
-- 每个数据文件都应默认导出一个对象。
+- 每个数据文件可以选择导出一个默认对象，也可以只执行副作用逻辑。
 - `dtc` 从配置中的 `data` 入口文件开始执行。
 - 所有数据文件共同构建一个最终全局对象，供后续模板阶段使用。
 
@@ -14,15 +14,15 @@
 1. 加载入口文件。
 2. 执行入口文件顶层代码。
 3. 若顶层代码调用 `include()`，立即处理被包含文件。
-4. 顶层代码中的 `remove()`、`update()` 与 `get()` 立即作用于当前全局对象。
-5. 当前文件顶层执行结束后，将其默认导出的对象合并到全局对象。
+4. 顶层代码中的 `remove()`、`replace()`、`update()` 与 `get()` 立即作用于当前全局对象。
+5. 当前文件顶层执行结束后，如果存在默认导出，则将其合并到全局对象。
 6. 入口文件及其递归包含的所有文件处理完成后，得到最终全局对象。
 
 ## `include(path)`
 
 ### 作用
 
-加载另一个数据文件，并把其默认导出的对象合并进当前全局对象。
+加载另一个数据文件，并在其执行完成后把默认导出对象合并进当前全局对象。
 
 ### 路径规则
 
@@ -35,7 +35,7 @@
 - `include()` 在顶层执行阶段立即生效。
 - 同一个绝对路径文件只执行一次。
 - 如果出现循环包含，第二次遇到已在加载栈中的文件时直接报错。
-- 被包含文件执行完成后，其默认导出对象按合并规则并入全局对象。
+- 被包含文件执行完成后，如果存在默认导出，则按合并规则并入全局对象。
 
 ## `remove(path)`
 
@@ -55,24 +55,44 @@
 - 如果路径不存在，则忽略，不报错。
 - 删除后父对象保持存在，不自动清理空对象。
 
-## `update(path, value)`
+## `replace(path, value)`
 
 ### 作用
 
-更新当前全局对象上的指定路径；如果目标路径不存在，则创建并写入新值。
+直接替换当前全局对象上指定路径的值。
 
 ### 路径格式
 
-- `update()` 接受点分路径字符串，例如 `meta.version`。
+- `replace()` 接受点分路径字符串，例如 `meta.version`。
 - 不支持数组索引。
 - 不支持通配符。
 
 ### 行为规则
 
-- 如果最终字段已经存在，则直接覆盖其值。
+- 如果最终字段已经存在，则直接替换为新值。
 - 如果中间路径不存在，则自动创建普通对象。
 - 如果中间路径存在但不是普通对象，则直接报错。
 - `value` 可以是任意可放入全局对象的 JavaScript 值。
+
+## `update(path, patchObject)`
+
+### 作用
+
+把一个普通对象补丁深合并到当前全局对象上的指定路径。
+
+### 路径格式
+
+- `update()` 接受点分路径字符串，例如 `meta` 或 `modules.detail`。
+- 不支持数组索引。
+- 不支持通配符。
+
+### 行为规则
+
+- `patchObject` 必须是普通对象。
+- 如果目标路径不存在，则自动创建普通对象后再合并。
+- 如果中间路径存在但不是普通对象，则直接报错。
+- 如果目标路径存在但不是普通对象，则直接报错。
+- 对象补丁的合并规则与默认导出对象的深合并规则一致。
 
 ## `get(path)`
 
@@ -93,6 +113,7 @@
 - 如果路径不存在，则直接报错。
 - 如果路径中包含数组，则对应路径段必须是数字下标。
 - 如果遍历过程中遇到非对象、非数组值但路径还未结束，则直接报错。
+- 如果返回值是对象或数组，调用方可以直接修改它，变更会立即反映到当前全局对象。
 
 ## 合并规则
 
@@ -128,9 +149,9 @@
 
 ## 默认导出要求
 
-- 每个数据文件都必须存在默认导出。
-- 默认导出必须是普通对象。
-- 如果默认导出不是对象，则报错并停止执行。
+- 数据文件可以没有默认导出。
+- 如果存在默认导出，则默认导出必须是普通对象。
+- 如果默认导出存在但不是普通对象，则报错并停止执行。
 
 ## 示例
 
@@ -152,10 +173,12 @@ include("sub.js");
 remove("test.test1");
 const titleBeforeUpdate = get("test.test2.test3");
 const secondName = get("items.1.name");
-update("test.test2.test3", "from-update");
-update("meta.version", "1.0.0");
-update("meta.previousTitle", titleBeforeUpdate);
-update("meta.secondName", secondName);
+replace("test.test2.test3", "from-update");
+update("meta", {
+  version: "1.0.0",
+  previousTitle: titleBeforeUpdate,
+  secondName
+});
 
 export default {
   items: [
@@ -209,9 +232,10 @@ export default {
 ## 当前实现模块
 
 - `src/app/data/data-loader.js`：负责入口执行和递归 `include()`。
+- `src/app/data/replace-path.js`：负责点分路径直接替换。
 - `src/app/data/merge.js`：负责对象深合并。
 - `src/app/data/object-meta.js`：负责补充 `name`。
 - `src/app/data/remove-path.js`：负责点分路径删除。
-- `src/app/data/update-path.js`：负责点分路径更新与新增。
+- `src/app/data/update-path.js`：负责点分路径对象更新与新增。
 - `src/app/data/get-path.js`：负责点分路径读取。
 - `src/app/data/data-query.js`：负责递归搜集带 `match` 的对象。

@@ -22,8 +22,10 @@
 | 入口数据执行 | done | `src/app/data/data-loader.js` 已能从入口脚本构建最终全局对象。 |
 | `include()` | done | 已支持同步包含、相对路径解析和循环包含检测。 |
 | `remove()` | done | 已支持点分路径删除。 |
-| `update()` | done | 已支持点分路径更新与缺失路径自动创建。 |
+| `replace()` | done | 已支持点分路径直接替换与缺失路径自动创建。 |
+| `update()` | done | 已支持按对象深合并更新目标路径，并可自动创建缺失对象路径。 |
 | `get()` | done | 已支持点分路径读取，且允许通过数字下标访问数组项。 |
+| 无默认导出数据脚本 | done | 已支持只执行副作用逻辑、不额外合并默认对象的数据脚本。 |
 | 深合并规则 | done | `src/app/data/merge.js` 已实现深合并与类型不匹配报错。 |
 | 对象元信息补充 | done | `src/app/data/object-meta.js` 已补充 `name`，模板渲染时会临时提供 `parent`。 |
 | 模板 glob 搜索 | done | `src/lib/runtime/glob.js` 与 `src/app/template/template-discovery.js` 已实现模板发现与去重。 |

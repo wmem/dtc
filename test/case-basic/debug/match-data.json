@@ -6,6 +6,7 @@
         "enable": true,
         "match": "detail.tpl",
         "title": "detail-updated-by-root",
+        "patchedBySideEffect": "yes",
         "name": "detail"
       },
       {
@@ -25,6 +26,7 @@
           "enable": true,
           "match": "detail.tpl",
           "title": "detail-updated-by-root",
+          "patchedBySideEffect": "yes",
           "name": "detail"
         },
         "enable": true,

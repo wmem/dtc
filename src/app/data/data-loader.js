@@ -1,5 +1,5 @@
 // 文件说明：
-// 负责执行入口数据脚本，处理 include()/remove()/update()/get()，并构建最终全局对象。
+// 负责执行入口数据脚本，处理 include()/remove()/replace()/update()/get()，并构建最终全局对象。
 import * as std from "qjs:std";
 import { isPlainObject } from "../../lib/utils/object-kind.js";
 import { readTextFile } from "../../lib/runtime/fs.js";
@@ -9,15 +9,12 @@ import { getPath } from "./get-path.js";
 import { mergeInto } from "./merge.js";
 import { applyObjectMetadata } from "./object-meta.js";
 import { removePath } from "./remove-path.js";
+import { replacePath } from "./replace-path.js";
 import { updatePath } from "./update-path.js";
 
 // 把数据脚本改写成可被 std.evalScript 同步执行的形式。
 function transformDataModule(source, filePath) {
     const exportRegex = /\bexport\s+default\b/;
-    if (!exportRegex.test(source)) {
-        throw new Error(`Data file must contain 'export default': ${filePath}`);
-    }
-
     // 数据脚本只允许通过 include() 组织依赖，避免引入异步模块语义。
     if (/\bimport\s+[^("'`]/.test(source) || /\bimport\s*\(/.test(source)) {
         throw new Error(`Data file import is not supported in dtc data modules: ${filePath}`);
@@ -34,7 +31,7 @@ function transformDataModule(source, filePath) {
     ].join("\n");
 }
 
-// 同步执行单个数据脚本并返回默认导出对象。
+// 同步执行单个数据脚本并返回默认导出对象；无默认导出时返回 undefined。
 function executeDataModule(filePath) {
     const source = readTextFile(filePath);
     const wrappedSource = transformDataModule(source, filePath);
@@ -62,10 +59,12 @@ function loadModule(filePath, state) {
 
     try {
         const exported = executeDataModule(normalizedFile);
-        if (!isPlainObject(exported)) {
+        if (exported !== undefined && !isPlainObject(exported)) {
             throw new Error(`Default export must be a plain object: ${normalizedFile}`);
         }
-        mergeInto(state.globalData, exported);
+        if (exported !== undefined) {
+            mergeInto(state.globalData, exported);
+        }
         state.loadedFiles.add(comparablePath);
     } catch (error) {
         throw new Error(`Failed to load data file ${normalizedFile}: ${error.message}`);
@@ -87,10 +86,11 @@ export function buildGlobalData(entryPath, options = {}) {
 
     const previousInclude = globalThis.include;
     const previousRemove = globalThis.remove;
+    const previousReplace = globalThis.replace;
     const previousUpdate = globalThis.update;
     const previousGet = globalThis.get;
 
-    // include/remove/update/get 以临时全局函数形式暴露给数据脚本使用。
+    // include/remove/replace/update/get 以临时全局函数形式暴露给数据脚本使用。
     globalThis.include = (targetPath) => {
         if (typeof targetPath !== "string" || targetPath.length === 0) {
             throw new Error("include() expects a non-empty path string.");
@@ -109,8 +109,12 @@ export function buildGlobalData(entryPath, options = {}) {
         removePath(state.globalData, dottedPath);
     };
 
-    globalThis.update = (dottedPath, value) => {
-        updatePath(state.globalData, dottedPath, value);
+    globalThis.replace = (dottedPath, value) => {
+        replacePath(state.globalData, dottedPath, value);
+    };
+
+    globalThis.update = (dottedPath, patch) => {
+        updatePath(state.globalData, dottedPath, patch);
     };
 
     globalThis.get = (dottedPath) => {
@@ -128,6 +132,7 @@ export function buildGlobalData(entryPath, options = {}) {
     } finally {
         globalThis.include = previousInclude;
         globalThis.remove = previousRemove;
+        globalThis.replace = previousReplace;
         globalThis.update = previousUpdate;
         globalThis.get = previousGet;
     }

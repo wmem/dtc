@@ -1,12 +1,17 @@
 include("sub.js");
+include("patch.js");
 remove("modules.obsolete");
 const detailTitleBeforeUpdate = get("modules.detail.title");
 const secondLookupName = get("lookup.items.1.name");
-update("modules.detail.title", "detail-updated-by-root");
-update("meta.extra", "added-by-update");
-update("meta.detailTitleBeforeUpdate", detailTitleBeforeUpdate);
-update("meta.secondLookupName", secondLookupName);
-update("docs.item.note", "created-before-merge");
+replace("modules.detail.title", "detail-updated-by-root");
+update("meta", {
+  extra: "added-by-update",
+  detailTitleBeforeUpdate,
+  secondLookupName
+});
+update("docs.item", {
+  note: "created-before-merge"
+});
 
 export default {
   meta: {

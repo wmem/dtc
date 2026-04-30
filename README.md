@@ -6,7 +6,7 @@
 
 - 纯 JavaScript 实现，运行时为 QuickJS
 - 使用 `qjs:std`、`qjs:os` 访问 QuickJS 内建能力
-- 支持 `include()`、`remove()`、`update()` 和 `get()` 构建全局对象
+- 支持 `include()`、`remove()`、`replace()`、`update()` 和 `get()` 构建全局对象
 - 支持模板文件通配符搜索
 - 支持对象 `match` 通配符匹配模板文件名
 - 自动为普通对象补充 `name`，并在模板渲染时提供 `parent`
@@ -76,8 +76,8 @@ bin/qjs-linux-x86_64 src/index.js --version
 
 1. 读取 `dtc.json`
 2. 执行 `data` 指定的入口脚本
-3. 在执行期间处理 `include()` 和 `remove()`
-4. 合并所有默认导出对象，得到最终全局对象
+3. 在执行期间处理 `include()`、`remove()`、`replace()`、`update()` 和 `get()`
+4. 合并所有存在默认导出的对象，得到最终全局对象
 5. 为普通对象补充 `name`
 6. 在模板渲染时临时提供 `parent`
 7. 按 `tpl[].files` 搜索模板文件
@@ -91,7 +91,7 @@ bin/qjs-linux-x86_64 src/index.js --version
 
 1. `doc/spec-vision.md`：整体目标、处理流程、边界和输出规则
 2. `doc/spec-config.md`：配置文件结构和路径规则
-3. `doc/spec-data-model.md`：入口脚本、`include()`、`remove()` 和对象合并语义
+3. `doc/spec-data-model.md`：入口脚本、`include()`、`remove()`、`replace()`、`update()` 和对象合并语义
 4. `doc/spec-templates.md`：模板发现、`match` 规则和输出聚合
 5. `doc/spec-rendering.md`：EJS 渲染上下文和 QuickJS 约束
 6. `doc/architecture-build.md`：源码模块划分和构建链路
@@ -146,19 +146,22 @@ npm install -g esbuild
 
 ## 数据脚本约定
 
-数据脚本必须是 ES Module，并且必须有默认导出对象。
+数据脚本必须是 ES Module。它既可以通过 `export default` 返回一个对象参与合并，也可以不导出默认对象、只通过脚本副作用直接修改当前全局对象。
 
 示例：
 
 ```js
 include("sub.js");
+include("patch.js");
 remove("modules.obsolete");
 const detailTitle = get("modules.detail.title");
 const secondName = get("lookup.items.1.name");
-update("modules.detail.title", "detail-updated-by-root");
-update("meta.extra", "added-by-update");
-update("meta.detailTitle", detailTitle);
-update("meta.secondName", secondName);
+replace("modules.detail.title", "detail-updated-by-root");
+update("meta", {
+  extra: "added-by-update",
+  detailTitle,
+  secondName
+});
 
 export default {
   meta: {
@@ -175,8 +178,11 @@ export default {
 
 - `include("sub.js")`：按当前脚本所在目录解析相对路径
 - `remove("a.b.c")`：从当前全局对象删除点分路径
-- `update("a.b.c", value)`：更新已有字段，或自动创建缺失路径后写入值
+- `replace("a.b.c", value)`：直接替换路径上的值，必要时自动创建缺失路径
+- `update("a.b.c", patchObject)`：把普通对象补丁深合并到目标对象上，必要时自动创建缺失路径
 - `get("a.b.c")`：读取当前全局对象中的值；路径不存在时报错，支持数组下标如 `items.1.name`
+- `get()` 返回对象或数组时，可直接修改返回值，从而以副作用方式更新全局对象
+- 数据脚本没有 `export default` 时，不会额外合并对象，但脚本副作用仍然生效
 - 只有 `enable === true` 且 `match` 命中的对象才会参与模板渲染
 - 合并时类型不匹配会报错
 - 数组中的对象不会参与模板匹配遍历
@@ -260,7 +266,8 @@ bin/qjs-linux-x86_64 --module test/test.js
 - 基础渲染流程
 - 版本号来源
 - 调试输出文件
-- `include()` / `remove()` / `update()` / `get()`
+- `include()` / `remove()` / `replace()` / `update()` / `get()`
+- 无 `default export` 模块的副作用更新
 - `enable === true` 过滤逻辑
 - `get()` 读取缺失路径报错
 - `name` 与渲染期 `parent`
