@@ -1,6 +1,6 @@
 # 数据模型与脚本执行规格
 
-本文档定义入口数据脚本、`include()`、`remove()`、`replace()`、`update()`、`get()` 和最终全局对象的构建规则。
+本文档定义入口数据脚本、`include()`、`remove()`、`replace()`、`update()`、`updateRoot()`、`get()` 和最终全局对象的构建规则。
 
 ## 基本模型
 
@@ -14,7 +14,7 @@
 1. 加载入口文件。
 2. 执行入口文件顶层代码。
 3. 若顶层代码调用 `include()`，立即处理被包含文件。
-4. 顶层代码中的 `remove()`、`replace()`、`update()` 与 `get()` 立即作用于当前全局对象。
+4. 顶层代码中的 `remove()`、`replace()`、`update()`、`updateRoot()` 与 `get()` 立即作用于当前全局对象。
 5. 当前文件顶层执行结束后，如果存在默认导出，则将其合并到全局对象。
 6. 入口文件及其递归包含的所有文件处理完成后，得到最终全局对象。
 
@@ -93,6 +93,18 @@
 - 如果中间路径存在但不是普通对象，则直接报错。
 - 如果目标路径存在但不是普通对象，则直接报错。
 - 对象补丁的合并规则与默认导出对象的深合并规则一致。
+
+## `updateRoot(patchObject)`
+
+### 作用
+
+把一个普通对象补丁直接深合并到当前全局对象的根对象上。
+
+### 行为规则
+
+- `patchObject` 必须是普通对象。
+- 合并规则与默认导出对象的深合并规则一致。
+- 适合用于需要一次更新多个顶层字段的场景。
 
 ## `get(path)`
 
@@ -179,6 +191,11 @@ update("meta", {
   previousTitle: titleBeforeUpdate,
   secondName
 });
+updateRoot({
+  flags: {
+    enabled: true
+  }
+});
 
 export default {
   items: [
@@ -206,6 +223,9 @@ export default {
     previousTitle: "kkk",
     secondName: "second"
   },
+  flags: {
+    enabled: true
+  },
   items: [
     { name: "first" },
     { name: "second" }
@@ -232,10 +252,12 @@ export default {
 ## 当前实现模块
 
 - `src/app/data/data-loader.js`：负责入口执行和递归 `include()`。
+- `src/app/data/script-globals.js`：集中定义并注册数据脚本可用的全局函数，同时维护函数签名与说明元信息。
 - `src/app/data/replace-path.js`：负责点分路径直接替换。
 - `src/app/data/merge.js`：负责对象深合并。
 - `src/app/data/object-meta.js`：负责补充 `name`。
 - `src/app/data/remove-path.js`：负责点分路径删除。
 - `src/app/data/update-path.js`：负责点分路径对象更新与新增。
+- `src/app/data/update-root.js`：负责把对象补丁更新到全局根对象。
 - `src/app/data/get-path.js`：负责点分路径读取。
 - `src/app/data/data-query.js`：负责递归搜集带 `match` 的对象。

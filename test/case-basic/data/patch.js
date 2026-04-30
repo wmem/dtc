@@ -1,6 +1,8 @@
 const detail = get("modules.detail");
 detail.patchedBySideEffect = "yes";
 
-update("meta", {
-  patchedBySideEffect: true
+updateRoot({
+  meta: {
+    patchedBySideEffect: true
+  }
 });

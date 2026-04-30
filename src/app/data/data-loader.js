@@ -1,16 +1,13 @@
 // 文件说明：
-// 负责执行入口数据脚本，处理 include()/remove()/replace()/update()/get()，并构建最终全局对象。
+// 负责执行入口数据脚本，处理 include()/remove()/replace()/update()/updateRoot()/get()，并构建最终全局对象。
 import * as std from "qjs:std";
 import { isPlainObject } from "../../lib/utils/object-kind.js";
 import { readTextFile } from "../../lib/runtime/fs.js";
-import { dirname, normalizePath, resolvePath, toComparablePath } from "../../lib/runtime/path.js";
+import { normalizePath, toComparablePath } from "../../lib/runtime/path.js";
 import { toDebugJsonValue } from "../debug/debug-output.js";
-import { getPath } from "./get-path.js";
 import { mergeInto } from "./merge.js";
 import { applyObjectMetadata } from "./object-meta.js";
-import { removePath } from "./remove-path.js";
-import { replacePath } from "./replace-path.js";
-import { updatePath } from "./update-path.js";
+import { installDataScriptGlobals } from "./script-globals.js";
 
 // 把数据脚本改写成可被 std.evalScript 同步执行的形式。
 function transformDataModule(source, filePath) {
@@ -84,42 +81,8 @@ export function buildGlobalData(entryPath, options = {}) {
         fileStack: [],
     };
 
-    const previousInclude = globalThis.include;
-    const previousRemove = globalThis.remove;
-    const previousReplace = globalThis.replace;
-    const previousUpdate = globalThis.update;
-    const previousGet = globalThis.get;
-
-    // include/remove/replace/update/get 以临时全局函数形式暴露给数据脚本使用。
-    globalThis.include = (targetPath) => {
-        if (typeof targetPath !== "string" || targetPath.length === 0) {
-            throw new Error("include() expects a non-empty path string.");
-        }
-
-        const currentFile = state.fileStack[state.fileStack.length - 1];
-        if (!currentFile) {
-            throw new Error("include() can only be used while a data file is being evaluated.");
-        }
-
-        const resolvedPath = resolvePath(dirname(currentFile), targetPath);
-        loadModule(resolvedPath, state);
-    };
-
-    globalThis.remove = (dottedPath) => {
-        removePath(state.globalData, dottedPath);
-    };
-
-    globalThis.replace = (dottedPath, value) => {
-        replacePath(state.globalData, dottedPath, value);
-    };
-
-    globalThis.update = (dottedPath, patch) => {
-        updatePath(state.globalData, dottedPath, patch);
-    };
-
-    globalThis.get = (dottedPath) => {
-        return getPath(state.globalData, dottedPath);
-    };
+    // 数据脚本可用函数统一在定义数组中注册，后续新增能力时只需要追加一项。
+    const restoreGlobals = installDataScriptGlobals(state, loadModule);
 
     try {
         loadModule(normalizedEntry, state);
@@ -130,10 +93,6 @@ export function buildGlobalData(entryPath, options = {}) {
         applyObjectMetadata(state.globalData);
         return state.globalData;
     } finally {
-        globalThis.include = previousInclude;
-        globalThis.remove = previousRemove;
-        globalThis.replace = previousReplace;
-        globalThis.update = previousUpdate;
-        globalThis.get = previousGet;
+        restoreGlobals();
     }
 }

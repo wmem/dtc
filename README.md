@@ -6,7 +6,7 @@
 
 - 纯 JavaScript 实现，运行时为 QuickJS
 - 使用 `qjs:std`、`qjs:os` 访问 QuickJS 内建能力
-- 支持 `include()`、`remove()`、`replace()`、`update()` 和 `get()` 构建全局对象
+- 支持 `include()`、`remove()`、`replace()`、`update()`、`updateRoot()` 和 `get()` 构建全局对象
 - 支持模板文件通配符搜索
 - 支持对象 `match` 通配符匹配模板文件名
 - 自动为普通对象补充 `name`，并在模板渲染时提供 `parent`
@@ -76,7 +76,7 @@ bin/qjs-linux-x86_64 src/index.js --version
 
 1. 读取 `dtc.json`
 2. 执行 `data` 指定的入口脚本
-3. 在执行期间处理 `include()`、`remove()`、`replace()`、`update()` 和 `get()`
+3. 在执行期间处理 `include()`、`remove()`、`replace()`、`update()`、`updateRoot()` 和 `get()`
 4. 合并所有存在默认导出的对象，得到最终全局对象
 5. 为普通对象补充 `name`
 6. 在模板渲染时临时提供 `parent`
@@ -91,7 +91,7 @@ bin/qjs-linux-x86_64 src/index.js --version
 
 1. `doc/spec-vision.md`：整体目标、处理流程、边界和输出规则
 2. `doc/spec-config.md`：配置文件结构和路径规则
-3. `doc/spec-data-model.md`：入口脚本、`include()`、`remove()`、`replace()`、`update()` 和对象合并语义
+3. `doc/spec-data-model.md`：入口脚本、`include()`、`remove()`、`replace()`、`update()`、`updateRoot()` 和对象合并语义
 4. `doc/spec-templates.md`：模板发现、`match` 规则和输出聚合
 5. `doc/spec-rendering.md`：EJS 渲染上下文和 QuickJS 约束
 6. `doc/architecture-build.md`：源码模块划分和构建链路
@@ -162,6 +162,11 @@ update("meta", {
   detailTitle,
   secondName
 });
+updateRoot({
+  flags: {
+    fromRootPatch: true
+  }
+});
 
 export default {
   meta: {
@@ -180,6 +185,7 @@ export default {
 - `remove("a.b.c")`：从当前全局对象删除点分路径
 - `replace("a.b.c", value)`：直接替换路径上的值，必要时自动创建缺失路径
 - `update("a.b.c", patchObject)`：把普通对象补丁深合并到目标对象上，必要时自动创建缺失路径
+- `updateRoot(patchObject)`：把普通对象补丁直接深合并到全局根对象
 - `get("a.b.c")`：读取当前全局对象中的值；路径不存在时报错，支持数组下标如 `items.1.name`
 - `get()` 返回对象或数组时，可直接修改返回值，从而以副作用方式更新全局对象
 - 数据脚本没有 `export default` 时，不会额外合并对象，但脚本副作用仍然生效
@@ -266,7 +272,7 @@ bin/qjs-linux-x86_64 --module test/test.js
 - 基础渲染流程
 - 版本号来源
 - 调试输出文件
-- `include()` / `remove()` / `replace()` / `update()` / `get()`
+- `include()` / `remove()` / `replace()` / `update()` / `updateRoot()` / `get()`
 - 无 `default export` 模块的副作用更新
 - `enable === true` 过滤逻辑
 - `get()` 读取缺失路径报错

@@ -3,6 +3,10 @@ import * as os from "qjs:os";
 import { loadConfig } from "../src/app/config/config.js";
 import { buildGlobalData } from "../src/app/data/data-loader.js";
 import { collectMatchedObjects } from "../src/app/data/data-query.js";
+import { replacePath } from "../src/app/data/replace-path.js";
+import { getDataScriptGlobalMetadata, installDataScriptGlobals } from "../src/app/data/script-globals.js";
+import { updatePath } from "../src/app/data/update-path.js";
+import { updateRoot } from "../src/app/data/update-root.js";
 import { run } from "../src/app/cil/run.js";
 import { normalizePath } from "../src/lib/runtime/path.js";
 import { readTextFile } from "../src/lib/runtime/fs.js";
@@ -50,6 +54,114 @@ function runVersionCase() {
   assert(/^\d+\.\d+\.\d+$/.test(VERSION), "VERSION 应使用 x.y.z 格式");
 }
 
+function runScriptGlobalsCase() {
+  const metadata = getDataScriptGlobalMetadata();
+  const expectedNames = ["include", "remove", "replace", "update", "updateRoot", "get"];
+
+  assert(metadata.length === expectedNames.length, "数据脚本函数元数据数量应与当前函数列表一致");
+  for (let i = 0; i < expectedNames.length; i += 1) {
+    assert(metadata[i].name === expectedNames[i], `第 ${i + 1} 个数据脚本函数名不符合预期`);
+    assert(typeof metadata[i].signature === "string" && metadata[i].signature.length > 0, `${metadata[i].name} 应提供签名`);
+    assert(typeof metadata[i].description === "string" && metadata[i].description.length > 0, `${metadata[i].name} 应提供说明`);
+  }
+
+  const originalInclude = globalThis.include;
+  const state = {
+    globalData: {},
+    fileStack: ["/tmp/root.js"],
+  };
+  let loadedPath;
+  const restore = installDataScriptGlobals(state, (filePath) => {
+    loadedPath = filePath;
+  });
+
+  try {
+    assert(typeof globalThis.include === "function", "安装后 include 应为函数");
+    assert(typeof globalThis.updateRoot === "function", "安装后 updateRoot 应为函数");
+
+    globalThis.updateRoot({
+      meta: {
+        fromInstallTest: true,
+      },
+    });
+    assert(state.globalData.meta.fromInstallTest === true, "安装后的 updateRoot 应能更新根对象");
+
+    globalThis.include("child.js");
+    assert(loadedPath === "/tmp/child.js", "安装后的 include 应按当前文件目录解析路径");
+  } finally {
+    restore();
+  }
+
+  assert(globalThis.include === originalInclude, "恢复后 include 应还原为之前的全局值");
+}
+
+function runUpdateRootCase() {
+  const root = {
+    meta: {
+      version: "1.0.0",
+    },
+  };
+
+  updateRoot(root, {
+    meta: {
+      name: "demo",
+    },
+    flags: {
+      enabled: true,
+    },
+  });
+
+  assert(root.meta.version === "1.0.0", "updateRoot() 应保留根对象中已有字段");
+  assert(root.meta.name === "demo", "updateRoot() 应能合并已有顶层对象");
+  assert(root.flags.enabled === true, "updateRoot() 应能创建缺失的顶层对象");
+
+  expectThrows(
+    () => updateRoot(root, "bad-patch"),
+    "updateRoot() expects a plain object patch.",
+    "updateRoot() 应拒绝非对象补丁"
+  );
+}
+
+function runReplaceAndUpdateEdgeCase() {
+  const root = {
+    meta: {
+      version: "1.0.0",
+      nested: {
+        enabled: true,
+      },
+    },
+  };
+
+  replacePath(root, "meta.version", "2.0.0");
+  assert(root.meta.version === "2.0.0", "replace() 应能直接替换已有标量字段");
+
+  updatePath(root, "meta", {
+    nested: {
+      name: "demo",
+    },
+  });
+  assert(root.meta.nested.enabled === true, "update() 应在对象合并时保留原有字段");
+  assert(root.meta.nested.name === "demo", "update() 应在对象合并时写入新增字段");
+
+  expectThrows(
+    () => replacePath({ meta: "text" }, "meta.version", "2.0.0"),
+    "replace() cannot create nested property through non-object path: meta",
+    "replace() 穿过非对象路径时应报错"
+  );
+
+  expectThrows(
+    () => updatePath({ meta: "text" }, "meta", { version: "2.0.0" }),
+    "update() target must be a plain object: meta",
+    "update() 目标路径不是对象时应报错"
+  );
+
+  expectThrows(
+    () => updatePath({}, "meta", "bad-patch"),
+    "update() expects a plain object patch.",
+    "update() 应拒绝非对象补丁"
+  );
+}
+
 function runBasicCase(projectRoot) {
   const caseDir = `${projectRoot}/test/case-basic`;
   const configPath = `${caseDir}/dtc.json`;
@@ -71,7 +183,7 @@ function runBasicCase(projectRoot) {
   assert(rootData.meta.extra === "added-by-update", "update() 应能按对象合并并创建缺失路径");
   assert(rootData.meta.detailTitleBeforeUpdate === "detail-from-sub", "get() 应能读取当前全局对象中的已有字段");
   assert(rootData.meta.secondLookupName === "second-item", "get() 应支持读取数组项路径");
-  assert(rootData.meta.patchedBySideEffect === true, "无 default export 的模块应能只通过副作用更新全局对象");
+  assert(rootData.meta.patchedBySideEffect === true, "updateRoot() 应能直接更新全局根对象");
   assert(rootData.docs.item.note === "created-before-merge", "update() 应能在默认导出合并前创建对象路径");
   assert(rootData.docs.item.parent === undefined, "子对象本身也不应注入 parent 字段");
   assert(matchedObjects.length === 3, "应只找到 3 个可渲染对象，数组中的对象不能参与遍历");
@@ -96,7 +208,7 @@ function runBasicCase(projectRoot) {
   assert(debugData.meta.extra === "added-by-update", "全局对象调试输出应体现 update() 的对象合并结果");
   assert(debugData.meta.detailTitleBeforeUpdate === "detail-from-sub", "全局对象调试输出应保留 get() 读取到的对象字段");
   assert(debugData.meta.secondLookupName === "second-item", "全局对象调试输出应保留 get() 读取到的数组项");
-  assert(debugData.meta.patchedBySideEffect === true, "全局对象调试输出应包含无 default export 模块的副作用更新");
+  assert(debugData.meta.patchedBySideEffect === true, "全局对象调试输出应体现 updateRoot() 的更新结果");
   assert(debugData.docs.item.note === "created-before-merge", "全局对象调试输出应保留 update() 新建的对象路径");
   assert(debugData.docs.item.title === "detail-from-root", "全局对象调试输出应包含合并后的数据");
 
@@ -197,6 +309,15 @@ function main() {
 
   runVersionCase();
   console.log("case-version passed");
+
+  runScriptGlobalsCase();
+  console.log("case-script-globals passed");
+
+  runUpdateRootCase();
+  console.log("case-update-root passed");
+
+  runReplaceAndUpdateEdgeCase();
+  console.log("case-replace-update-edge passed");
 
   runBasicCase(projectRoot);
   console.log("case-basic passed");

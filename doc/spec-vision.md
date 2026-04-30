@@ -10,7 +10,7 @@
 
 1. 读取配置文件。
 2. 解析 `data` 字段，定位入口 JS 文件。
-3. 执行入口 JS，并在执行期间支持 `include()`、`remove()`、`replace()`、`update()` 与 `get()` 访问或修改全局对象。
+3. 执行入口 JS，并在执行期间支持 `include()`、`remove()`、`replace()`、`update()`、`updateRoot()` 与 `get()` 访问或修改全局对象。
 4. 如果当前文件存在 `export default`，则在顶层执行结束后把默认导出对象合并到全局对象。
 5. 如果配置了 `debugDataOut`，在补充对象元信息之前输出最终全局对象 JSON。
 6. 获得最终全局对象后，为每个普通对象补充 `name` 字段。

@@ -29,8 +29,12 @@
   - 检查重复输出路径。
 - `src/app/data/data-loader.js`
   - 执行入口数据脚本。
-  - 暴露 `include()` / `remove()` / `replace()` / `update()` / `get()`。
+  - 通过统一注册表暴露 `include()` / `remove()` / `replace()` / `update()` / `updateRoot()` / `get()`。
   - 管理加载栈和已加载集合。
+- `src/app/data/script-globals.js`
+  - 用数组集中定义数据脚本可用函数。
+  - 同时维护函数签名和说明元信息。
+  - 负责安装与恢复运行时全局函数。
 - `src/app/data/replace-path.js`
   - 按点分路径直接替换值。
 - `src/app/data/merge.js`
@@ -42,6 +46,8 @@
   - 删除点分路径。
 - `src/app/data/update-path.js`
   - 以对象补丁方式更新或新增点分路径。
+- `src/app/data/update-root.js`
+  - 把对象补丁直接合并到全局根对象。
 - `src/app/data/get-path.js`
   - 读取点分路径，支持数组下标访问。
 - `src/app/data/data-query.js`
