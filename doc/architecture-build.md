@@ -45,7 +45,8 @@
 - `src/app/data/remove-path.js`
   - 删除点分路径。
 - `src/app/data/update-path.js`
-  - 以对象补丁方式更新或新增点分路径。
+  - 负责点分路径更新。
+  - 对对象值执行深合并，对非对象值执行同类型覆盖更新。
 - `src/app/data/update-root.js`
   - 把对象补丁直接合并到全局根对象。
 - `src/app/data/get-path.js`

@@ -257,6 +257,18 @@ npm install -g esbuild
 
 数据脚本必须是 ES Module。它既可以通过 `export default` 返回一个对象参与合并，也可以不导出默认对象、只通过脚本副作用直接修改当前全局对象。
 
+常用函数可以这样理解：
+
+| 函数 | 适合场景 | 示例 |
+| --- | --- | --- |
+| `include()` | 拆分数据脚本，按文件组织数据 | `include("sub.js")` |
+| `remove()` | 删除不需要的字段 | `remove("modules.obsolete")` |
+| `replace()` | 直接覆盖某个路径的值 | `replace("docs.item.note", "created")` |
+| `update(path, object)` | 保留原对象其他字段，只补充或修改其中一部分 | `update("meta", { version: "1.0.0" })` |
+| `update(path, scalar)` | 更新一个已存在且类型匹配的属性值 | `update("modules.detail.title", "new-title")` |
+| `updateRoot()` | 一次更新多个顶层字段 | `updateRoot({ flags: { enabled: true } })` |
+| `get()` | 读取当前全局对象中的值，供后续计算使用 | `const version = get("meta.version")` |
+
 示例：
 
 ```js
@@ -265,12 +277,13 @@ include("patch.js");
 remove("modules.obsolete");
 const detailTitle = get("modules.detail.title");
 const secondName = get("lookup.items.1.name");
-replace("modules.detail.title", "detail-updated-by-root");
+update("modules.detail.title", "detail-updated-by-root");
 update("meta", {
   extra: "added-by-update",
   detailTitle,
   secondName
 });
+replace("docs.item.note", "created-before-merge");
 updateRoot({
   flags: {
     fromRootPatch: true
@@ -293,7 +306,8 @@ export default {
 - `include("sub.js")`：按当前脚本所在目录解析相对路径
 - `remove("a.b.c")`：从当前全局对象删除点分路径
 - `replace("a.b.c", value)`：直接替换路径上的值，必要时自动创建缺失路径
-- `update("a.b.c", patchObject)`：把普通对象补丁深合并到目标对象上，必要时自动创建缺失路径
+- `update("a.b.c", patchObject)`：如果传入普通对象，则把对象补丁深合并到目标对象上，必要时自动创建缺失路径
+- `update("a.b.c", value)`：如果传入非对象值，则只允许更新已存在且类型匹配的字段，否则报错
 - `updateRoot(patchObject)`：把普通对象补丁直接深合并到全局根对象
 - `get("a.b.c")`：读取当前全局对象中的值；路径不存在时报错，支持数组下标如 `items.1.name`
 - `get()` 返回对象或数组时，可直接修改返回值，从而以副作用方式更新全局对象

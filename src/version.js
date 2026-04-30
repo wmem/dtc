@@ -1,5 +1,8 @@
 // 文件说明：
 // 保存 dtc 的版本号，是项目代码中的唯一版本来源。
 
-// 修改版本时只需要更新这里。
-export const VERSION = "0.1.0";
+// update支持更新标量
+export const VERSION = "0.1.1";
+
+// 第一个实现版本
+// export const VERSION = "0.1.0";

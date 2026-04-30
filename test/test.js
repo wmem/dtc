@@ -143,6 +143,9 @@ function runReplaceAndUpdateEdgeCase() {
   assert(root.meta.nested.enabled === true, "update() 应在对象合并时保留原有字段");
   assert(root.meta.nested.name === "demo", "update() 应在对象合并时写入新增字段");
 
+  updatePath(root, "meta.version", "3.0.0");
+  assert(root.meta.version === "3.0.0", "update() 应允许同类型标量更新已有属性");
+
   expectThrows(
     () => replacePath({ meta: "text" }, "meta.version", "2.0.0"),
     "replace() cannot create nested property through non-object path: meta",
@@ -156,9 +159,15 @@ function runReplaceAndUpdateEdgeCase() {
   );
 
   expectThrows(
-    () => updatePath({}, "meta", "bad-patch"),
-    "update() expects a plain object patch.",
-    "update() 应拒绝非对象补丁"
+    () => updatePath({ meta: 1 }, "meta", "bad-patch"),
+    "update() value kind mismatch at meta: number !== string",
+    "update() 用标量更新时类型不匹配应报错"
+  );
+
+  expectThrows(
+    () => updatePath({}, "meta.version", "3.0.0"),
+    "update() target path does not exist for non-object value: meta.version",
+    "update() 用非对象值更新不存在路径时应报错"
   );
 }
 
@@ -178,13 +187,13 @@ function runBasicCase(projectRoot) {
   assert(rootData.modules.name === "modules", "modules.name 应自动补成 modules");
   assert(rootData.modules.parent === undefined, "普通对象本身不应注入 parent 字段");
   assert(rootData.modules.obsolete === undefined, "remove() 应删除 modules.obsolete");
-  assert(rootData.modules.detail.title === "detail-updated-by-root", "replace() 应能直接替换已有字段");
+  assert(rootData.modules.detail.title === "detail-updated-by-root", "update() 应能直接更新已存在且类型匹配的标量字段");
   assert(rootData.modules.detail.patchedBySideEffect === "yes", "无 default export 的模块应能直接修改已有对象");
   assert(rootData.meta.extra === "added-by-update", "update() 应能按对象合并并创建缺失路径");
   assert(rootData.meta.detailTitleBeforeUpdate === "detail-from-sub", "get() 应能读取当前全局对象中的已有字段");
   assert(rootData.meta.secondLookupName === "second-item", "get() 应支持读取数组项路径");
   assert(rootData.meta.patchedBySideEffect === true, "updateRoot() 应能直接更新全局根对象");
-  assert(rootData.docs.item.note === "created-before-merge", "update() 应能在默认导出合并前创建对象路径");
+  assert(rootData.docs.item.note === "created-before-merge", "replace() 应能在默认导出合并前创建对象路径");
   assert(rootData.docs.item.parent === undefined, "子对象本身也不应注入 parent 字段");
   assert(matchedObjects.length === 3, "应只找到 3 个可渲染对象，数组中的对象不能参与遍历");
 
@@ -203,13 +212,13 @@ function runBasicCase(projectRoot) {
   assert(debugData.name === undefined, "全局对象调试输出应在注入 name 前生成");
   assert(debugData.parent === undefined, "全局对象调试输出不应包含 parent");
   assert(debugData.modules.obsolete === undefined, "全局对象调试输出应体现 remove() 的结果");
-  assert(debugData.modules.detail.title === "detail-updated-by-root", "全局对象调试输出应体现 replace() 的替换结果");
+  assert(debugData.modules.detail.title === "detail-updated-by-root", "全局对象调试输出应体现 update() 的标量更新结果");
   assert(debugData.modules.detail.patchedBySideEffect === "yes", "全局对象调试输出应包含无 default export 模块的直接修改");
   assert(debugData.meta.extra === "added-by-update", "全局对象调试输出应体现 update() 的对象合并结果");
   assert(debugData.meta.detailTitleBeforeUpdate === "detail-from-sub", "全局对象调试输出应保留 get() 读取到的对象字段");
   assert(debugData.meta.secondLookupName === "second-item", "全局对象调试输出应保留 get() 读取到的数组项");
   assert(debugData.meta.patchedBySideEffect === true, "全局对象调试输出应体现 updateRoot() 的更新结果");
-  assert(debugData.docs.item.note === "created-before-merge", "全局对象调试输出应保留 update() 新建的对象路径");
+  assert(debugData.docs.item.note === "created-before-merge", "全局对象调试输出应保留 replace() 新建的对象路径");
   assert(debugData.docs.item.title === "detail-from-root", "全局对象调试输出应包含合并后的数据");
 
   const debugMatch = JSON.parse(readTextFile(debugMatchPath));

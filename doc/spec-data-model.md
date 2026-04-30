@@ -74,11 +74,11 @@
 - 如果中间路径存在但不是普通对象，则直接报错。
 - `value` 可以是任意可放入全局对象的 JavaScript 值。
 
-## `update(path, patchObject)`
+## `update(path, value)`
 
 ### 作用
 
-把一个普通对象补丁深合并到当前全局对象上的指定路径。
+更新当前全局对象上的指定路径。根据 `value` 的类型，分为对象更新和非对象更新两种模式。
 
 ### 路径格式
 
@@ -88,11 +88,15 @@
 
 ### 行为规则
 
-- `patchObject` 必须是普通对象。
-- 如果目标路径不存在，则自动创建普通对象后再合并。
-- 如果中间路径存在但不是普通对象，则直接报错。
-- 如果目标路径存在但不是普通对象，则直接报错。
-- 对象补丁的合并规则与默认导出对象的深合并规则一致。
+- 如果 `value` 是普通对象：
+  - 如果目标路径不存在，则自动创建普通对象后再合并。
+  - 如果中间路径存在但不是普通对象，则直接报错。
+  - 如果目标路径存在但不是普通对象，则直接报错。
+  - 对象补丁的合并规则与默认导出对象的深合并规则一致。
+- 如果 `value` 不是普通对象：
+  - 只允许更新已经存在的目标路径。
+  - 目标路径上原值与新值的类型必须一致，否则直接报错。
+  - 类型一致时，直接用新值覆盖旧值。
 
 ## `updateRoot(patchObject)`
 
@@ -185,12 +189,13 @@ include("sub.js");
 remove("test.test1");
 const titleBeforeUpdate = get("test.test2.test3");
 const secondName = get("items.1.name");
-replace("test.test2.test3", "from-update");
+update("test.test2.test3", "from-update");
 update("meta", {
   version: "1.0.0",
   previousTitle: titleBeforeUpdate,
   secondName
 });
+replace("meta.note", "created-by-replace");
 updateRoot({
   flags: {
     enabled: true
@@ -220,6 +225,7 @@ export default {
   meta: {
     version: "1.0.0",
     extra: "created",
+    note: "created-by-replace",
     previousTitle: "kkk",
     secondName: "second"
   },
