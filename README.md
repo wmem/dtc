@@ -2,6 +2,80 @@
 
 `dtc` 是一个运行在 QuickJS 上的模板生成工具。它会读取一个 JSON 配置文件，执行入口数据脚本构建最终全局对象，筛选匹配模板的数据对象，再使用 EJS 渲染并输出目标文件。
 
+## 这个工具是干嘛的
+
+`dtc` 适合用来做“用一份结构化数据，批量生成文本文件”的场景，例如：
+
+- 根据模块配置生成代码文件
+- 根据对象清单生成配置文件
+- 根据一组业务定义生成文档、脚本或清单文件
+
+它的核心思路是把“数据准备”和“模板渲染”拆开：
+
+1. 用 `data/*.js` 组织和加工数据
+2. 用 `tpl/*.tpl` 编写输出模板
+3. 让 `dtc` 自动匹配数据对象和模板，生成最终文件
+
+如果你不想在模板里塞很多数据处理逻辑，而是想先把数据整理干净，再稳定地产出目标文件，这个工具就比较合适。
+
+## 简单 Demo
+
+假设你想根据一份模块定义，生成一个文本清单文件。
+
+配置文件 `dtc.json`：
+
+```json
+{
+  "data": "data/root.js",
+  "tpl": [
+    {
+      "files": ["tpl/*.tpl"],
+      "out": "out/modules.txt"
+    }
+  ]
+}
+```
+
+数据文件 `data/root.js`：
+
+```js
+export default {
+  modules: {
+    user: {
+      enable: true,
+      match: "module.tpl",
+      title: "User Module"
+    },
+    order: {
+      enable: true,
+      match: "module.tpl",
+      title: "Order Module"
+    }
+  }
+};
+```
+
+模板文件 `tpl/module.tpl`：
+
+```ejs
+MODULE:<%= item.name %>|TITLE:<%= item.title %>
+```
+
+运行后会生成 `out/modules.txt`：
+
+```text
+MODULE:user|TITLE:User Module
+MODULE:order|TITLE:Order Module
+```
+
+也就是说，你只需要：
+
+- 在数据脚本里准备对象
+- 给要参与渲染的对象加上 `enable: true` 和 `match`
+- 写一个模板
+
+`dtc` 就会自动把命中的对象逐个渲染到目标输出文件里。
+
 ## 特性
 
 - 纯 JavaScript 实现，运行时为 QuickJS
