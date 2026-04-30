@@ -1,12 +1,13 @@
 import * as std from "qjs:std";
 import * as os from "qjs:os";
-import { loadConfig } from "../src/core/config.js";
-import { buildGlobalData } from "../src/core/data-loader.js";
-import { collectMatchedObjects } from "../src/core/data-query.js";
-import { run } from "../src/core/run.js";
-import { normalizePath } from "../src/runtime/path.js";
-import { readTextFile } from "../src/runtime/fs.js";
+import { loadConfig } from "../src/app/config/config.js";
+import { buildGlobalData } from "../src/app/data/data-loader.js";
+import { collectMatchedObjects } from "../src/app/data/data-query.js";
+import { run } from "../src/app/cil/run.js";
+import { normalizePath } from "../src/lib/runtime/path.js";
+import { readTextFile } from "../src/lib/runtime/fs.js";
 import { VERSION } from "../src/version.js";
+import { loadConfig } from "../src/app/config/config.js";
 
 function unwrapOsResult(result, action) {
   if (!Array.isArray(result)) {
