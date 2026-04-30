@@ -1,3 +1,4 @@
+import * as std from "qjs:std";
 import { VERSION } from "../../version.js";
 
 // 输出当前 dtc 版本号。

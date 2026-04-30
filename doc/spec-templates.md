@@ -81,7 +81,7 @@
 
 ## 模板调试输出
 
-如果配置了 `debugMatchOut`，建议输出如下结构：
+如果配置了 `debugMatchOut`，当前实现输出如下结构：
 
 ```js
 [
@@ -121,7 +121,7 @@
 
 ## 模板上下文中的元信息
 
-每次渲染建议提供以下元信息，便于模板使用：
+每次渲染提供以下元信息，便于模板使用：
 
 ```js
 {
@@ -146,9 +146,9 @@
 - `template` 描述当前模板。
 - `output` 描述当前输出目标。
 
-## 建议的内部模块
+## 当前实现模块
 
-- `src/core/template-discovery.js`：展开模板模式并去重。
-- `src/core/template-match.js`：实现 `match` 与模板文件名比较。
-- `src/core/render-task.js`：负责单个模板任务的渲染和片段聚合。
-- `src/core/output-writer.js`：负责目录创建和最终写文件。
+- `src/app/template/template-discovery.js`：展开模板模式并去重。
+- `src/app/template/template-match.js`：实现 `match` 与模板文件名比较。
+- `src/app/template/render-task.js`：负责单个模板任务的渲染和片段聚合。
+- `src/app/template/output-writer.js`：负责目录创建和最终写文件。

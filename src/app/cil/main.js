@@ -25,8 +25,7 @@ export function main() {
         //run dtc
         if (args.length !== 1) {
             printUsage();
-            printError(new Error("Invalid arguments."));
-            std.exit(1);
+            throw new Error("Invalid arguments.");
         }
         run(args[0]);
 

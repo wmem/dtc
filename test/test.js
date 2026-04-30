@@ -7,7 +7,6 @@ import { run } from "../src/app/cil/run.js";
 import { normalizePath } from "../src/lib/runtime/path.js";
 import { readTextFile } from "../src/lib/runtime/fs.js";
 import { VERSION } from "../src/version.js";
-import { loadConfig } from "../src/app/config/config.js";
 
 function unwrapOsResult(result, action) {
   if (!Array.isArray(result)) {

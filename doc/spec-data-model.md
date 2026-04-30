@@ -206,12 +206,12 @@ export default {
   - 包含 `enable` 字段，且 `enable === true`
 - 候选对象在渲染时保持原始结构，不额外裁剪字段。
 
-## 建议的内部模块
+## 当前实现模块
 
-- `src/core/data-loader.js`：负责入口执行和递归 `include()`。
-- `src/core/merge.js`：负责对象深合并。
-- `src/core/object-meta.js`：负责补充 `name`。
-- `src/core/remove-path.js`：负责点分路径删除。
-- `src/core/update-path.js`：负责点分路径更新与新增。
-- `src/core/get-path.js`：负责点分路径读取。
-- `src/core/data-query.js`：负责递归搜集带 `match` 的对象。
+- `src/app/data/data-loader.js`：负责入口执行和递归 `include()`。
+- `src/app/data/merge.js`：负责对象深合并。
+- `src/app/data/object-meta.js`：负责补充 `name`。
+- `src/app/data/remove-path.js`：负责点分路径删除。
+- `src/app/data/update-path.js`：负责点分路径更新与新增。
+- `src/app/data/get-path.js`：负责点分路径读取。
+- `src/app/data/data-query.js`：负责递归搜集带 `match` 的对象。

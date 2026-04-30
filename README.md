@@ -19,7 +19,7 @@
 - CLI 可通过以下命令查看版本：
 
 ```sh
-build/dtc --version
+build/dtc.run --version
 ```
 
 或：
@@ -32,7 +32,7 @@ bin/qjs-linux-x86_64 src/index.js --version
 
 - 全部业务代码使用 JavaScript 实现
 - 运行时是 QuickJS，不能依赖 Node.js API，也不能依赖浏览器 API
-- 模板引擎固定为 EJS，当前通过 `src/ejs/ejs-wrapper.js` 适配到 QuickJS
+- 模板引擎固定为 EJS，当前通过 `src/lib/ejs/ejs-wrapper.js` 适配到 QuickJS
 - 构建链路固定为 `esbuild -> qjs -c -> 可执行文件`
 - 路径处理同时兼容 Linux 和 Windows，包括相对路径、绝对路径和分隔符差异
 
@@ -46,7 +46,7 @@ bin/qjs-linux-x86_64 src/index.js --version
 - `name` 元信息补充与渲染期 `parent`
 - 模板发现、`match` 匹配与 EJS 渲染
 - 输出写盘
-- 打包为 `build/bundle.js`、`build/dtc`、`build/dtc.exe`
+- 打包为 `build/bundle.js`、`build/dtc.run`、`build/dtc.exe`
 - 多组集成测试
 
 ## 目录结构
@@ -57,14 +57,14 @@ bin/qjs-linux-x86_64 src/index.js --version
 ├── build/                  构建产物
 ├── doc/                    设计文档与规格文档
 ├── src/
-│   ├── core/               配置解析、数据构建、模板渲染主流程
-│   ├── runtime/            文件、路径、glob 等 QuickJS 运行时适配
-│   ├── lib/                可复用的公共工具
-│   ├── ejs/                EJS 适配层和预构建产物
+│   ├── app/                CLI、配置、数据、模板与调试等业务代码
+│   ├── lib/                QuickJS 运行时适配、EJS 包装与公共工具
 │   └── index.js            CLI 入口
 ├── test/
 │   ├── case-basic/         基础成功用例
+│   ├── case-enable-filter/ enable=true 过滤用例
 │   ├── case-empty-output/  无匹配输出用例
+│   ├── case-get-missing/   get() 读取缺失路径报错用例
 │   ├── case-type-mismatch/ 合并类型冲突用例
 │   ├── case-circular/      循环 include 用例
 │   ├── case-wildcard/      通配符匹配用例
@@ -232,19 +232,19 @@ bin/qjs-linux-x86_64 build/bundle.js path/to/dtc.json
 构建后会生成：
 
 - `build/bundle.js`
-- `build/dtc`
+- `build/dtc.run`
 - `build/dtc.exe`
 
 运行编译后的 Linux 可执行文件：
 
 ```sh
-build/dtc path/to/dtc.json
+build/dtc.run path/to/dtc.json
 ```
 
 查看编译产物版本：
 
 ```sh
-build/dtc --version
+build/dtc.run --version
 ```
 
 ## 测试
@@ -252,7 +252,7 @@ build/dtc --version
 运行全部测试：
 
 ```sh
-bin/qjs-linux-x86_64 test/test.js
+bin/qjs-linux-x86_64 --module test/test.js
 ```
 
 当前测试覆盖：
@@ -261,6 +261,8 @@ bin/qjs-linux-x86_64 test/test.js
 - 版本号来源
 - 调试输出文件
 - `include()` / `remove()` / `update()` / `get()`
+- `enable === true` 过滤逻辑
+- `get()` 读取缺失路径报错
 - `name` 与渲染期 `parent`
 - 空输出行为
 - 通配符模板匹配

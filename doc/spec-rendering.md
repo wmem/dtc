@@ -6,10 +6,10 @@
 
 当前仓库已经提供：
 
-- `src/ejs/ejs.min.js`
-- `src/ejs/ejs-wrapper.js`
+- `src/lib/ejs/ejs.min.js`
+- `src/lib/ejs/ejs-wrapper.js`
 
-推荐继续通过 `ejs-wrapper.js` 暴露统一的 `ejs` 对象，不直接在业务代码中依赖浏览器全局变量。
+当前实现通过 `ejs-wrapper.js` 暴露统一的 `ejs` 对象，不直接在业务代码中依赖浏览器全局变量。
 
 ## 渲染入口
 
@@ -23,7 +23,7 @@ ejs.render(templateContent, renderContext)
 
 ## 渲染上下文
 
-建议模板上下文固定为以下结构：
+当前模板上下文固定为以下结构：
 
 ```js
 {
