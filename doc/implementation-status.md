@@ -33,6 +33,7 @@
 | 通配符公共库 | done | `src/lib/utils/pattern.js` 已供 glob 与 `match` 共享。 |
 | `match` 数据搜索 | done | `src/app/data/data-query.js` 已按“只遍历普通对象、不进入数组、且要求 enable=true”实现搜索。 |
 | EJS 正式渲染上下文 | done | 已按 `item/parent/root/template/output` 提供上下文。 |
+| EJS 自定义左右标识 | done | 已支持通过配置文件中的 `ejs.openDelimiter` / `ejs.closeDelimiter` 自定义模板外层标识，未配置时使用默认值。 |
 | 调试输出文件 | done | 已支持输出全局对象快照和模板命中对象明细。 |
 | 输出聚合与写盘 | done | 已实现片段拼接、目录创建和最终写入。 |
 | 错误处理与退出码 | done | 源码模式、bundle 模式和独立可执行文件都能给出清晰错误并以非零状态退出。 |

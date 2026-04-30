@@ -233,6 +233,22 @@ function runEmptyOutputCase(projectRoot) {
   assert(rendered === "", "无匹配对象时应生成空文件");
 }
 
+function runCustomDelimitersCase(projectRoot) {
+  const caseDir = `${projectRoot}/test/case-custom-delimiters`;
+  const configPath = `${caseDir}/dtc.json`;
+  const outputPath = `${caseDir}/out/generated.txt`;
+  const config = loadConfig(configPath);
+
+  assert(config.ejsOptions.openDelimiter === "[", "应能读取自定义 EJS 左标识");
+  assert(config.ejsOptions.closeDelimiter === "]", "应能读取自定义 EJS 右标识");
+
+  run(configPath);
+
+  const rendered = readTextFile(outputPath);
+  const expected = "CUSTOM|customItem|custom-delimiter-demo";
+  assert(rendered === expected, `自定义 EJS 标识输出不符合预期。\n--- expected ---\n${expected}\n--- actual ---\n${rendered}`);
+}
+
 function runWildcardCase(projectRoot) {
   const caseDir = `${projectRoot}/test/case-wildcard`;
   const configPath = `${caseDir}/dtc.json`;
@@ -324,6 +340,9 @@ function main() {
 
   runEmptyOutputCase(projectRoot);
   console.log("case-empty-output passed");
+
+  runCustomDelimitersCase(projectRoot);
+  console.log("case-custom-delimiters passed");
 
   runWildcardCase(projectRoot);
   console.log("case-wildcard passed");

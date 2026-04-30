@@ -193,6 +193,10 @@ npm install -g esbuild
   "data": "data/root.js",
   "debugDataOut": "debug/global-data.json",
   "debugMatchOut": "debug/match-data.json",
+  "ejs": {
+    "openDelimiter": "[",
+    "closeDelimiter": "]"
+  },
   "tpl": [
     {
       "files": [
@@ -209,6 +213,8 @@ npm install -g esbuild
 - `data`：入口数据脚本，相对于配置文件所在目录
 - `debugDataOut`：可选，全局对象调试输出文件；为空或未配置则不输出
 - `debugMatchOut`：可选，模板与命中对象调试输出文件；为空或未配置则不输出
+- `ejs.openDelimiter`：可选，EJS 左侧分隔符外层字符，默认是 `<`
+- `ejs.closeDelimiter`：可选，EJS 右侧分隔符外层字符，默认是 `>`
 - `tpl[].files`：模板文件模式列表，支持 `*`、`?`、`**`
 - `tpl[].out`：输出文件路径，相对于配置文件所在目录
 
@@ -217,6 +223,35 @@ npm install -g esbuild
 - `debugDataOut` 输出的是补充 `name` 之前的全局对象 JSON 快照
 - `debugMatchOut` 输出的是模板路径和命中对象数据列表
 - 模板调试对象默认不写入 `parent`
+
+自定义 EJS 分隔符说明：
+
+- 如果未配置 `ejs.openDelimiter` / `ejs.closeDelimiter`，则继续使用默认标识 `<%` 和 `%>`
+- 如果配置为 `[` 和 `]`，则模板标识会变成 `[%` 和 `%]`
+
+示例：
+
+```json
+{
+  "data": "data/root.js",
+  "ejs": {
+    "openDelimiter": "[",
+    "closeDelimiter": "]"
+  },
+  "tpl": [
+    {
+      "files": ["tpl/*.tpl"],
+      "out": "out/generated.txt"
+    }
+  ]
+}
+```
+
+对应模板可以写成：
+
+```ejs
+[%= item.name %]|[%= item.title %]
+```
 
 ## 数据脚本约定
 

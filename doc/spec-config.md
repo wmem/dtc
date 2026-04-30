@@ -9,6 +9,10 @@
   "data": "data/root.js",
   "debugDataOut": "debug/global-data.json",
   "debugMatchOut": "debug/match-data.json",
+  "ejs": {
+    "openDelimiter": "[",
+    "closeDelimiter": "]"
+  },
   "tpl": [
     {
       "files": [
@@ -59,6 +63,30 @@
   - 输出内容为 JSON。
   - 每条记录至少包含模板文件路径和命中的对象数据列表。
 
+### `ejs`
+
+- 类型：`object`
+- 必填：否
+- 含义：控制 EJS 模板语法的可选渲染配置。
+
+### `ejs.openDelimiter`
+
+- 类型：`string`
+- 必填：否
+- 含义：EJS 左侧分隔符的外层字符。
+- 约束：
+  - 只能是单个字符。
+  - 未配置时使用 EJS 默认值 `<`。
+
+### `ejs.closeDelimiter`
+
+- 类型：`string`
+- 必填：否
+- 含义：EJS 右侧分隔符的外层字符。
+- 约束：
+  - 只能是单个字符。
+  - 未配置时使用 EJS 默认值 `>`。
+
 ### `tpl[].files`
 
 - 类型：`array<string>`
@@ -101,6 +129,8 @@
 5. 每个 `tpl.files` 必须是非空字符串数组。
 6. 每个 `tpl.out` 必须是非空字符串。
 7. `debugDataOut` 和 `debugMatchOut` 如果配置，必须是字符串或空字符串。
+8. `ejs` 如果配置，必须是对象。
+9. `ejs.openDelimiter` 和 `ejs.closeDelimiter` 如果配置，必须是单字符字符串。
 
 任一校验失败都应立刻报错并停止执行。
 
@@ -131,6 +161,10 @@
   dataEntry: "/abs/project/data/root.js",
   debugDataOut: "/abs/project/debug/global-data.json",
   debugMatchOut: "/abs/project/debug/match-data.json",
+  ejsOptions: {
+    openDelimiter: "[",
+    closeDelimiter: "]"
+  },
   tasks: [
     {
       filePatterns: ["tpl/*.tpl", "tpl/common/header.tpl"],

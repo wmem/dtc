@@ -7,7 +7,7 @@ import { toDebugJsonValue } from "../debug/debug-output.js";
 import { matchesTemplate } from "../template/template-match.js";
 
 // 渲染一个模板任务，返回最终应写入输出文件的文本内容。
-export function renderTask(rootData, matchedEntries, templateFiles, outputFile) {
+export function renderTask(rootData, matchedEntries, templateFiles, outputFile, ejsOptions = {}) {
     const fragments = [];
     const debugEntries = [];
 
@@ -34,7 +34,7 @@ export function renderTask(rootData, matchedEntries, templateFiles, outputFile) 
                     output: {
                         path: outputFile,
                     },
-                });
+                }, ejsOptions);
                 // 统一裁掉模板尾部空行，避免多个片段拼接后出现额外空白。
                 fragments.push(rendered.replace(/(?:\r?\n)+$/g, ""));
             } catch (error) {

@@ -1,0 +1,15 @@
+{
+  "data": "data/root.js",
+  "ejs": {
+    "openDelimiter": "[",
+    "closeDelimiter": "]"
+  },
+  "tpl": [
+    {
+      "files": [
+        "tpl/*.tpl"
+      ],
+      "out": "out/generated.txt"
+    }
+  ]
+}

@@ -30,6 +30,30 @@ function resolveOptionalPath(configDir, value) {
     return resolvePath(configDir, value);
 }
 
+// 解析可选的单字符 EJS 分隔符配置。
+function resolveOptionalDelimiter(value, fieldPath) {
+    if (value === undefined || value === null || value === "") {
+        return undefined;
+    }
+
+    assert(typeof value === "string", `${fieldPath} must be a string when provided.`);
+    assert(value.length === 1, `${fieldPath} must be a single character.`);
+    return value;
+}
+
+// 解析可选的 EJS 渲染选项。
+function resolveEjsOptions(value) {
+    if (value === undefined || value === null) {
+        return {};
+    }
+
+    assert(value && typeof value === "object" && !Array.isArray(value), "Config field 'ejs' must be an object when provided.");
+    return {
+        openDelimiter: resolveOptionalDelimiter(value.openDelimiter, "Config field 'ejs.openDelimiter'"),
+        closeDelimiter: resolveOptionalDelimiter(value.closeDelimiter, "Config field 'ejs.closeDelimiter'"),
+    };
+}
+
 // 加载配置文件并转换为内部统一使用的结构。
 export function loadConfig(configArg) {
     assert(isNonEmptyString(configArg), "Missing config file path.");
@@ -81,6 +105,7 @@ export function loadConfig(configArg) {
         dataEntry: resolvePath(configDir, parsed.data),
         debugDataOut: resolveOptionalPath(configDir, parsed.debugDataOut),
         debugMatchOut: resolveOptionalPath(configDir, parsed.debugMatchOut),
+        ejsOptions: resolveEjsOptions(parsed.ejs),
         tasks,
     };
 }

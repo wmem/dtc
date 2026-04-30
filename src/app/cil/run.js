@@ -36,7 +36,7 @@ export function run(configPath) {
     //render templates
     for (const task of config.tasks) {
         const templateFiles = discoverTemplates(config.configDir, task.filePatterns);
-        const rendered = renderTask(rootData, matchedObjects, templateFiles, task.outputFile);
+        const rendered = renderTask(rootData, matchedObjects, templateFiles, task.outputFile, config.ejsOptions);
         debugMatchEntries.push(...rendered.debugEntries);
         writeOutputFile(task.outputFile, rendered.content);
     }

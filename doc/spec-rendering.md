@@ -16,10 +16,33 @@
 每次模板渲染调用统一等价于：
 
 ```js
-ejs.render(templateContent, renderContext)
+ejs.render(templateContent, renderContext, ejsOptions)
 ```
 
 当前版本不启用自定义文件加载器，也不启用 EJS 的 `include` 模板功能。
+
+其中 `ejsOptions` 来自配置文件中的可选 `ejs` 字段。当前实现支持：
+
+- `openDelimiter`
+- `closeDelimiter`
+
+如果未配置，则继续使用 EJS 默认标识 `<%` 和 `%>`。
+如果配置为：
+
+```json
+{
+  "ejs": {
+    "openDelimiter": "[",
+    "closeDelimiter": "]"
+  }
+}
+```
+
+则模板可以写成：
+
+```ejs
+[%= item.name %]
+```
 
 ## 渲染上下文
 
@@ -64,6 +87,8 @@ const version = "<%= root.meta.version %>";
 - `<%= ... %>`：输出转义结果。
 - `<%- ... %>`：输出非转义结果。
 - `<% ... %>`：执行逻辑代码。
+
+当配置了自定义分隔符后，上述语法中的左右外层标识会随之变化，例如 `[%= ... %]`。
 
 ## 禁止能力
 
